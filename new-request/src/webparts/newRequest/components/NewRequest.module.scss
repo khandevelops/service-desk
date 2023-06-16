@@ -1,0 +1,87 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.newRequestContainer {
+	display: flex;
+	width: 100%;
+	justify-content: center;
+	.formContainer {
+		display: grid;
+		gap: 1.5rem 1.5rem;
+		width: 900px;
+		.inputLabel {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem 0.5rem;
+			div {
+				size: 16pt;
+				font-weight: 400;
+				color: #36454f;
+			}
+			input,
+			select {
+				padding: 0.5rem 1rem;
+				border-radius: 4px;
+				border: 2px solid #1347a4;
+				font-size: 12pt;
+			}
+			input,
+			select {
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+			textarea {
+				padding: 1rem 1rem;
+				border: 2px solid #1347a4;
+				font-size: 12pt;
+			}
+		}
+		.formGroup {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: auto;
+			gap: 1.5rem 1.25rem;
+		}
+		.buttonGroup {
+			width: 100%;
+			display: flex;
+			justify-content: center;
+			flex-direction: row;
+			margin-top: 2.5rem;
+			gap: 3rem;
+			button {
+				background-color: #1347a4;
+				color: white;
+				width: 18rem;
+				padding: 0.6rem 0;
+				font-size: 11pt;
+				font-weight: 100;
+				border-radius: 4px;
+				border: none;
+				text-decoration: none;
+				position: relative;
+				transition-duration: 0.4s;
+				overflow: hidden;
+				cursor: pointer;
+			}
+			button:after {
+				content: '';
+				background: #f1f1f1;
+				display: block;
+				position: absolute;
+				padding-top: 300%;
+				padding-left: 350%;
+				margin-left: -20px !important;
+				margin-top: -120%;
+				opacity: 0;
+				transition: all 0.8s;
+			}
+			button:active:after {
+				padding: 0;
+				margin: 0;
+				opacity: 1;
+				transition: 0s;
+			}
+		}
+	}
+}
