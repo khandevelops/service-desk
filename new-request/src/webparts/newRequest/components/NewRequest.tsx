@@ -16,8 +16,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
-		getValues
+		formState: { errors }
 	} = useForm();
 	const onSubmit: SubmitHandler<IRequest> = (data) => console.log(data);
 
@@ -31,16 +30,13 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		AssignTo: '',
 		DueDate: null,
 		Description: '',
-		SubmittedBy: '',
-		CreatedTime: null,
-		CompletedTime: null,
-		CompletedBy: ''
+		RequesterEmail: ''
 	});
 
 	useEffect(() => {
 		sp.web
 			.currentUser()
-			.then((currentUser) => setForm({ ...form, SubmittedBy: currentUser.Title }))
+			.then((currentUser) => setForm({ ...form, RequesterEmail: currentUser.Email }))
 			.catch((error: Error) => console.error(error.message));
 	}, []);
 
