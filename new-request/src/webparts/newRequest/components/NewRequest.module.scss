@@ -8,6 +8,19 @@
 		display: grid;
 		gap: 1.5rem 1.5rem;
 		width: 900px;
+		.fileInput {
+			display: flex;
+			justify-content: center;
+			width: 100%;
+			input::file-selector-button {
+				font-weight: bold;
+				color: #1347a4;
+				border: none;
+				padding: 0.5em;
+				border-radius: 3px;
+			}
+		}
+
 		.inputLabel {
 			display: flex;
 			flex-direction: column;

@@ -11,7 +11,12 @@ export interface IRequest {
   SubCategory: string;
   AssignTo: string;
   DueDate: Date;
+  RequesterEmail: string;
   Description: string;
-  CreatedOn: Date;
-  CreatedBy: string;
+  CompletedTime?: Date,
+  CompletedBy?: string
+}
+
+export interface IForm {
+  label: keyof IRequest, value: string; error: string; required: boolean;
 }
