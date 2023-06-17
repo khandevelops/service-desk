@@ -12,6 +12,8 @@ export interface IRequest {
   AssignTo: string;
   DueDate: Date;
   Description: string;
-  CreatedOn: Date;
-  CreatedBy: string;
+  CreatedTime: Date;
+  CompletedBy: string;
+  CompletedTime: Date;
+  SubmittedBy: string;
 }
