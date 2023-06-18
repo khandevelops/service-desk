@@ -19,8 +19,14 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		formState: { errors },
 		getValues,
 		setValue
-	} = useForm<IRequest>();
+	} = useForm<IRequest>({ defaultValues: {
+		Subject: ''
+	}
+
+	});
+
 	const onSubmit: SubmitHandler<IRequest> = (data) => console.log(data);
+	const { Category } = getValues()
 
 	const sp: SPFI = spfi().using(SPFx(context));
 
@@ -102,7 +108,16 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Sub Category</label>
-						<select {...register('SubCategory')} name='SubCategory'>
+						<select
+							{...register('SubCategory')}
+							name='SubCategory'
+							disabled={
+								!(
+									CATEGORY.some((category) => category.CATEGORY === ) &&
+									CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
+										.length > 0
+								)
+							}>
 							<option value=''>Select Sub Category</option>
 							{CATEGORY.filter((category) => category.CATEGORY === getValues().Category).length > 1 &&
 								CATEGORY.filter(
@@ -114,6 +129,50 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 								))}
 						</select>
 					</div>
+
+					<div className={styles.inputLabel}>
+						<label>Category</label>
+						<select onChange={handleSelect} name='category'>
+							<option value='null' selected disabled>
+								Select Category
+							</option>
+							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
+								<option key={index} value={category.CATEGORY}>
+									{category.CATEGORY}
+								</option>
+							))}
+						</select>
+					</div>
+					<div className={styles.inputLabel}>
+						<label>Sub Category</label>
+						<select
+							onChange={handleSelect}
+							name='sub-category'
+							disabled={
+								!(
+									CATEGORY.some((category) => category.CATEGORY === form.Category) &&
+									CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
+										.length > 0
+								)
+							}>
+							<option value='null' selected disabled>
+								{CATEGORY.some((category) => category.CATEGORY === form.Category) &&
+								CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
+									.length > 0
+									? 'Select Sub Category'
+									: ''}
+							</option>
+							{CATEGORY.filter((category) => category.CATEGORY === form.Category).length > 0 &&
+								CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY.map(
+									(subCategory, index) => (
+										<option key={index} value={subCategory}>
+											{subCategory}
+										</option>
+									)
+								)}
+						</select>
+					</div>
+
 					{/* <div className={styles.inputContainer}>
 						<label>Assign To</label>
 						<select {...register('assignTo')} name='assign-to'>
