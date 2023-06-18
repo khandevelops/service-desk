@@ -19,14 +19,21 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		formState: { errors },
 		getValues,
 		setValue
-	} = useForm<IRequest>({ defaultValues: {
-		Subject: ''
-	}
-
+	} = useForm<IRequest>({
+		defaultValues: {
+			Subject: '',
+			Priority: PRIORITY[0],
+			Category: '',
+			SubCategory: '',
+			AssignTo: '',
+			DueDate: null,
+			Description: '',
+			RequesterEmail: ''
+		}
 	});
 
 	const onSubmit: SubmitHandler<IRequest> = (data) => console.log(data);
-	const { Category } = getValues()
+	const { Category } = getValues();
 
 	const sp: SPFI = spfi().using(SPFx(context));
 
@@ -36,7 +43,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.currentUser()
 			.then((currentUser) => setValue('RequesterEmail', currentUser.Email))
 			.catch((error: Error) => console.error(error.message));
-	}, []);
+	}, [getValues]);
 
 	// const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
 	// 	if (event.target.name === 'subject') {
@@ -113,8 +120,8 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 							name='SubCategory'
 							disabled={
 								!(
-									CATEGORY.some((category) => category.CATEGORY === ) &&
-									CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
+									CATEGORY.some((category) => category.CATEGORY === Category) &&
+									CATEGORY.filter((category) => category.CATEGORY === Category)[0].SUBCATEGORY
 										.length > 0
 								)
 							}>
@@ -127,49 +134,6 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 										{subcategory}
 									</option>
 								))}
-						</select>
-					</div>
-
-					<div className={styles.inputLabel}>
-						<label>Category</label>
-						<select onChange={handleSelect} name='category'>
-							<option value='null' selected disabled>
-								Select Category
-							</option>
-							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
-								<option key={index} value={category.CATEGORY}>
-									{category.CATEGORY}
-								</option>
-							))}
-						</select>
-					</div>
-					<div className={styles.inputLabel}>
-						<label>Sub Category</label>
-						<select
-							onChange={handleSelect}
-							name='sub-category'
-							disabled={
-								!(
-									CATEGORY.some((category) => category.CATEGORY === form.Category) &&
-									CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
-										.length > 0
-								)
-							}>
-							<option value='null' selected disabled>
-								{CATEGORY.some((category) => category.CATEGORY === form.Category) &&
-								CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY
-									.length > 0
-									? 'Select Sub Category'
-									: ''}
-							</option>
-							{CATEGORY.filter((category) => category.CATEGORY === form.Category).length > 0 &&
-								CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY.map(
-									(subCategory, index) => (
-										<option key={index} value={subCategory}>
-											{subCategory}
-										</option>
-									)
-								)}
 						</select>
 					</div>
 
