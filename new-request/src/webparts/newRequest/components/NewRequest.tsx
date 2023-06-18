@@ -6,13 +6,18 @@ import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
+import '@pnp/sp/attachments';
 import { useEffect } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ASSIGN_TO, CATEGORY, PRIORITY } from '../constants';
+import { IItem } from '@pnp/sp/items';
+
 // import * as moment from 'moment';
 
 const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
+	const sp: SPFI = spfi().using(SPFx(context));
+	const [subCategory, setSubCategory] = React.useState<string[]>([]);
 	const {
 		register,
 		handleSubmit,
@@ -22,11 +27,18 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	} = useForm<IRequest>();
 
 	const onSubmit: SubmitHandler<IRequest> = (data) => {
-		
-	});
-	const [subCategory, setSubCategory] = React.useState<string[]>([]);
-
-	const sp: SPFI = spfi().using(SPFx(context));
+		sp.web.lists
+			.getByTitle('Requests')
+			.items.add({ ...data })
+			.then((response) => {
+				const item: IItem = sp.web.lists.getByTitle('MyList').items.getById(response.data.Id);
+				item.attachmentFiles
+					.add('file2.txt', 'Here is my content')
+					.then((response) => console.log(response))
+					.catch((error: Error) => console.error(error.message));
+			})
+			.catch((error: Error) => console.error(error.message));
+	};
 
 	useEffect(() => {
 		sp.web
@@ -44,21 +56,23 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	return (
 		<div className={styles.newRequestContainer}>
 			<form className={styles.formContainer} onSubmit={handleSubmit(onSubmit)}>
-				<div className={styles.inputContainer}>
-					<label>Subject</label>
-					<input {...register('Subject', { required: true })} name='Subject' />
-					{errors.Subject && <span className={styles.errorMessage}>This field is required</span>}
-				</div>
 				<div className={styles.formGroup}>
 					<div className={styles.inputContainer}>
+						<label>Subject</label>
+						<input {...register('Subject', { required: true })} name='Subject' />
+						{errors.Subject && <span className={styles.errorMessage}>This field is required</span>}
+					</div>
+					<div className={styles.inputContainer}>
 						<label>Priority</label>
-						<select {...register('Priority')} name='Priority'>
-							{PRIORITY.map((priority, index) => (
-								<option key={index} value={priority} selected={priority === 'HIGH' ? false : true}>
-									{priority}
-								</option>
-							))}
-						</select>
+						<div className={styles.select}>
+							<select {...register('Priority')} name='Priority'>
+								{PRIORITY.map((priority, index) => (
+									<option key={index} value={priority} selected={priority === 'HIGH' ? false : true}>
+										{priority}
+									</option>
+								))}
+							</select>
+						</div>
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Category</label>
@@ -77,7 +91,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 						<label>Sub Category</label>
 						<select {...register('SubCategory')} name='SubCategory' disabled={subCategory.length === 0}>
 							<option value='null' selected disabled>
-								Select Sub Category
+								{subCategory.length === 0 ? '' : 'Select Sub Category'}
 							</option>
 							{subCategory.map((category: string, index: number) => (
 								<option key={index} value={category}>
