@@ -9,7 +9,7 @@ import '@pnp/sp/site-users/web';
 import { useEffect } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { CATEGORY, PRIORITY } from '../constants';
+import { ASSIGN_TO, CATEGORY, PRIORITY } from '../constants';
 // import * as moment from 'moment';
 
 const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
@@ -17,72 +17,29 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		register,
 		handleSubmit,
 		formState: { errors },
-		getValues,
-		setValue
-	} = useForm<IRequest>({
-		defaultValues: {
-			Subject: '',
-			Priority: PRIORITY[0],
-			Category: '',
-			SubCategory: '',
-			AssignTo: '',
-			DueDate: null,
-			Description: '',
-			RequesterEmail: ''
-		}
-	});
+		setValue,
+		watch
+	} = useForm<IRequest>();
 
-	const onSubmit: SubmitHandler<IRequest> = (data) => console.log(data);
-	const { Category } = getValues();
+	const onSubmit: SubmitHandler<IRequest> = (data) => {
+		
+	});
+	const [subCategory, setSubCategory] = React.useState<string[]>([]);
 
 	const sp: SPFI = spfi().using(SPFx(context));
 
 	useEffect(() => {
-		console.log(getValues());
 		sp.web
 			.currentUser()
 			.then((currentUser) => setValue('RequesterEmail', currentUser.Email))
+			.then(() => {
+				const subscription = watch((value) => {
+					setSubCategory(CATEGORY.filter((category) => category.CATEGORY === value.Category)[0].SUBCATEGORY);
+				});
+				return () => subscription.unsubscribe();
+			})
 			.catch((error: Error) => console.error(error.message));
-	}, [getValues]);
-
-	// const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-	// 	if (event.target.name === 'subject') {
-	// 		setForm({ ...form, Subject: event.target.value });
-	// 	}
-	// 	if (event.target.name === 'due-date') {
-	// 		setForm({ ...form, DueDate: new Date(event.target.value) });
-	// 	}
-	// };
-
-	// const handleSelect = (event: ChangeEvent<HTMLSelectElement>): void => {
-	// 	console.log(event);
-	// 	if (event.target.name === 'Priority') {
-	// 		setForm({ ...form, Priority: event.target.value });
-	// 	}
-	// 	if (event.target.name === 'Category') {
-	// 		setForm({ ...form, Category: event.target.value });
-	// 	}
-	// 	if (event.target.name === 'SubCategory') {
-	// 		setForm({ ...form, SubCategory: event.target.value });
-	// 	}
-	// 	if (event.target.name === 'assignTo') {
-	// 		setForm({ ...form, AssignTo: event.target.value });
-	// 	}
-	// };
-
-	// const Select = forwardRef<
-	// 	HTMLSelectElement,
-	// 	{ label: string; options: string[] } & ReturnType<UseFormRegister<IRequest>>
-	// >(({ onChange, onBlur, name, label, options }, ref) => (
-	// 	<>
-	// 		<label>{label}</label>
-	// 		<select name={name} ref={ref} onChange={onChange} onBlur={onBlur}>
-	// 			{options.map((option, index) => (
-	// 				<option key={index}>{option}</option>
-	// 			))}
-	// 		</select>
-	// 	</>
-	// ));
+	}, [watch]);
 
 	return (
 		<div className={styles.newRequestContainer}>
@@ -90,14 +47,14 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 				<div className={styles.inputContainer}>
 					<label>Subject</label>
 					<input {...register('Subject', { required: true })} name='Subject' />
-					{errors.Subject && <span>This field is required</span>}
+					{errors.Subject && <span className={styles.errorMessage}>This field is required</span>}
 				</div>
 				<div className={styles.formGroup}>
 					<div className={styles.inputContainer}>
 						<label>Priority</label>
 						<select {...register('Priority')} name='Priority'>
 							{PRIORITY.map((priority, index) => (
-								<option key={index} value={priority}>
+								<option key={index} value={priority} selected={priority === 'HIGH' ? false : true}>
 									{priority}
 								</option>
 							))}
@@ -106,6 +63,9 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<div className={styles.inputContainer}>
 						<label>Category</label>
 						<select {...register('Category')} name='Category'>
+							<option value='null' selected disabled>
+								Select Category
+							</option>
 							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
 								<option key={index} value={category.CATEGORY}>
 									{category.CATEGORY}
@@ -115,49 +75,34 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Sub Category</label>
-						<select
-							{...register('SubCategory')}
-							name='SubCategory'
-							disabled={
-								!(
-									CATEGORY.some((category) => category.CATEGORY === Category) &&
-									CATEGORY.filter((category) => category.CATEGORY === Category)[0].SUBCATEGORY
-										.length > 0
-								)
-							}>
-							<option value=''>Select Sub Category</option>
-							{CATEGORY.filter((category) => category.CATEGORY === getValues().Category).length > 1 &&
-								CATEGORY.filter(
-									(category) => category.CATEGORY === getValues().Category
-								)[0].SUBCATEGORY.map((subcategory, index) => (
-									<option key={index} value={subcategory}>
-										{subcategory}
-									</option>
-								))}
-						</select>
-					</div>
-
-					{/* <div className={styles.inputContainer}>
-						<label>Assign To</label>
-						<select {...register('assignTo')} name='assign-to'>
-							<option> </option>
-							{Object.keys(ASSIGN_TO).map((category: string, index: number) => (
+						<select {...register('SubCategory')} name='SubCategory' disabled={subCategory.length === 0}>
+							<option value='null' selected disabled>
+								Select Sub Category
+							</option>
+							{subCategory.map((category: string, index: number) => (
 								<option key={index} value={category}>
 									{category}
 								</option>
 							))}
 						</select>
-					</div> */}
-					{/* <div className={styles.inputContainer}>
+					</div>
+					<div className={styles.inputContainer}>
+						<label>Assign To</label>
+						<select {...register('AssignTo')} name='AssignTo'>
+							<option value='null' selected disabled>
+								Assign
+							</option>
+							{ASSIGN_TO.map((assignTo: string, index: number) => (
+								<option key={index} value={assignTo}>
+									{assignTo}
+								</option>
+							))}
+						</select>
+					</div>
+					<div className={styles.inputContainer}>
 						<label>Due Date</label>
-						<input
-							onChange={handleInputChange}
-							type='datetime-local'
-							id='meeting-time'
-							name='due-date'
-							value={form && form.DueDate ? moment(form.DueDate).format('YYYY-MM-DD HH:mm:ss') : ''}
-						/>
-					</div> */}
+						<input type='datetime-local' id='due-date' name='DueDate' {...register('AssignTo')} />
+					</div>
 				</div>
 				<div className={styles.inputContainer}>
 					<label>Description</label>
