@@ -6,7 +6,7 @@ import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
-import { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { CATEGORY, PRIORITY } from '../constants';
@@ -16,38 +16,30 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors }
-	} = useForm();
+		formState: { errors },
+		getValues,
+		setValue
+	} = useForm<IRequest>();
 	const onSubmit: SubmitHandler<IRequest> = (data) => console.log(data);
 
 	const sp: SPFI = spfi().using(SPFx(context));
 
-	const [form, setForm] = useState<IRequest>({
-		Subject: '',
-		Priority: '',
-		Category: '',
-		SubCategory: '',
-		AssignTo: '',
-		DueDate: null,
-		Description: '',
-		RequesterEmail: ''
-	});
-
 	useEffect(() => {
+		console.log(getValues());
 		sp.web
 			.currentUser()
-			.then((currentUser) => setForm({ ...form, RequesterEmail: currentUser.Email }))
+			.then((currentUser) => setValue('RequesterEmail', currentUser.Email))
 			.catch((error: Error) => console.error(error.message));
 	}, []);
 
-	const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-		if (event.target.name === 'subject') {
-			setForm({ ...form, Subject: event.target.value });
-		}
-		if (event.target.name === 'due-date') {
-			setForm({ ...form, DueDate: new Date(event.target.value) });
-		}
-	};
+	// const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+	// 	if (event.target.name === 'subject') {
+	// 		setForm({ ...form, Subject: event.target.value });
+	// 	}
+	// 	if (event.target.name === 'due-date') {
+	// 		setForm({ ...form, DueDate: new Date(event.target.value) });
+	// 	}
+	// };
 
 	// const handleSelect = (event: ChangeEvent<HTMLSelectElement>): void => {
 	// 	console.log(event);
@@ -81,13 +73,11 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 
 	return (
 		<div className={styles.newRequestContainer}>
-			<div>hi</div>
-			<div>{form.Category}</div>
 			<form className={styles.formContainer} onSubmit={handleSubmit(onSubmit)}>
 				<div className={styles.inputContainer}>
 					<label>Subject</label>
-					<input {...register('Subject', { required: true })} name='Subject' onChange={handleInputChange} />
-					{errors.exampleRequired && <span>This field is required</span>}
+					<input {...register('Subject', { required: true })} name='Subject' />
+					{errors.Subject && <span>This field is required</span>}
 				</div>
 				<div className={styles.formGroup}>
 					<div className={styles.inputContainer}>
@@ -95,7 +85,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 						<select {...register('Priority')} name='Priority'>
 							{PRIORITY.map((priority, index) => (
 								<option key={index} value={priority}>
-									{priority.split('_').join(' ')}
+									{priority}
 								</option>
 							))}
 						</select>
@@ -103,9 +93,9 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<div className={styles.inputContainer}>
 						<label>Category</label>
 						<select {...register('Category')} name='Category'>
-							{CATEGORY.map((category, index) => (
+							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
 								<option key={index} value={category.CATEGORY}>
-									{category.CATEGORY.split('_').join(' ')}
+									{category.CATEGORY}
 								</option>
 							))}
 						</select>
@@ -113,14 +103,15 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<div className={styles.inputContainer}>
 						<label>Sub Category</label>
 						<select {...register('SubCategory')} name='SubCategory'>
-							{CATEGORY.filter((category) => category.CATEGORY === form.Category).length > 1 &&
-								CATEGORY.filter((category) => category.CATEGORY === form.Category)[0].SUBCATEGORY.map(
-									(subcategory, index) => (
-										<option key={index} value={subcategory}>
-											{subcategory.split('_').join(' ')}
-										</option>
-									)
-								)}
+							<option value=''>Select Sub Category</option>
+							{CATEGORY.filter((category) => category.CATEGORY === getValues().Category).length > 1 &&
+								CATEGORY.filter(
+									(category) => category.CATEGORY === getValues().Category
+								)[0].SUBCATEGORY.map((subcategory, index) => (
+									<option key={index} value={subcategory}>
+										{subcategory}
+									</option>
+								))}
 						</select>
 					</div>
 					{/* <div className={styles.inputContainer}>
@@ -129,7 +120,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 							<option> </option>
 							{Object.keys(ASSIGN_TO).map((category: string, index: number) => (
 								<option key={index} value={category}>
-									{category.split('_').join(' ')}
+									{category}
 								</option>
 							))}
 						</select>
