@@ -9,7 +9,7 @@ export interface IRequest {
   Priority: string;
   Category: string;
   SubCategory: string;
-  AssignTo: string;
+  Assign: string;
   DueDate: Date;
   Description: string;
   RequesterEmail: string;

@@ -10,11 +10,8 @@ import '@pnp/sp/attachments';
 import { useEffect, useState } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ASSIGN_TO, CATEGORY, PRIORITY } from '../constants';
+import { ASSIGN, CATEGORY, PRIORITY } from '../constants';
 import { IItemAddResult } from '@pnp/sp/items';
-// import { IItem } from '@pnp/sp/items';
-
-// import * as moment from 'moment';
 
 const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
@@ -24,9 +21,12 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		handleSubmit,
 		formState: { errors },
 		setValue,
-		watch
+		watch,
+		reset
 	} = useForm<IRequest>();
+
 	const watchCategory = watch('Category');
+	// const watchSubCategory = watch('SubCategory');
 
 	const onSubmit: SubmitHandler<IRequest> = (addRequestRequest: IRequest) => {
 		sp.web.lists
@@ -36,23 +36,27 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 				Priority: addRequestRequest.Priority,
 				Category: addRequestRequest.Category,
 				SubCategory: addRequestRequest.SubCategory,
-				AssignTo: addRequestRequest.AssignTo,
+				Assign: addRequestRequest.Assign,
 				DueDate: addRequestRequest.DueDate,
 				Description: addRequestRequest.Description,
 				RequesterEmail: addRequestRequest.RequesterEmail
 			})
 			.then((addRequestResponse: IItemAddResult) => {
-				addRequestRequest.Attached[0]
-					.arrayBuffer()
-					.then((buffer) => {
-						sp.web.lists
-							.getByTitle('Requests')
-							.items.getById(addRequestResponse.data.Id)
-							.attachmentFiles.add(addRequestRequest.Attached[0].name, buffer)
-							.then()
-							.catch((error: Error) => console.error(error.message));
-					})
-					.catch((error: Error) => console.error(error.message));
+				if (addRequestRequest.Attached.length > 0) {
+					addRequestRequest.Attached[0]
+						.arrayBuffer()
+						.then((buffer) => {
+							sp.web.lists
+								.getByTitle('Requests')
+								.items.getById(addRequestResponse.data.Id)
+								.attachmentFiles.add(addRequestRequest.Attached[0].name, buffer)
+								.then(() => reset())
+								.catch((error: Error) => console.error(error.message));
+						})
+						.catch((error: Error) => console.error(error.message));
+				} else {
+					reset();
+				}
 			})
 			.catch((error: Error) => console.error(error.message));
 	};
@@ -64,8 +68,9 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.catch((error: Error) => console.error(error.message));
 		const subscription = watch((value) => {
 			setSubCategory(
-				CATEGORY.filter((category) => category.CATEGORY === value.Category).length > 0 &&
-					CATEGORY.filter((category) => category.CATEGORY === value.Category)[0].SUBCATEGORY
+				CATEGORY.filter((category) => category.CATEGORY === value.Category).length > 0
+					? CATEGORY.filter((category) => category.CATEGORY === value.Category)[0].SUBCATEGORY
+					: []
 			);
 		});
 		return () => subscription.unsubscribe();
@@ -82,24 +87,23 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Priority</label>
-						<div className={styles.select}>
-							<select {...register('Priority')} name='Priority'>
-								{PRIORITY.map((priority, index) => (
-									<option key={index} value={priority} selected={priority === 'HIGH' ? false : true}>
-										{priority}
-									</option>
-								))}
-							</select>
-						</div>
+						<select {...register('Priority')} name='Priority'>
+							{PRIORITY.map((priority, index) => (
+								<option key={index} value={priority} selected={priority === 'NORMAL'}>
+									{priority}
+								</option>
+							))}
+						</select>
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Category</label>
 						<select {...register('Category')} name='Category'>
-							<option value='null' selected disabled>
-								Select Category
-							</option>
 							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
-								<option key={index} value={category.CATEGORY}>
+								<option
+									key={index}
+									value={category.CATEGORY}
+									hidden={category.CATEGORY === 'Select Category'}
+									selected={category.CATEGORY === 'Select Category'}>
 									{category.CATEGORY}
 								</option>
 							))}
@@ -108,26 +112,28 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<div className={styles.inputContainer}>
 						<label>Sub Category</label>
 						<select {...register('SubCategory')} name='SubCategory' disabled={subCategory.length === 0}>
-							<option value='null' selected disabled>
-								{subCategory.length === 0 ? '' : 'Select Sub Category'}
-							</option>
 							{watchCategory &&
 								subCategory.length > 0 &&
-								subCategory.map((category: string, index: number) => (
-									<option key={index} value={category}>
-										{category}
+								subCategory.map((subCategory: string, index: number) => (
+									<option
+										key={index}
+										value={subCategory}
+										hidden={subCategory === 'Select Sub Category'}
+										selected={subCategory === 'Select Sub Category'}>
+										{subCategory}
 									</option>
 								))}
 						</select>
 					</div>
 					<div className={styles.inputContainer}>
-						<label>Assign To</label>
-						<select {...register('AssignTo')} name='AssignTo'>
-							<option value='null' selected disabled>
-								Assign
-							</option>
-							{ASSIGN_TO.map((assignTo: string, index: number) => (
-								<option key={index} value={assignTo}>
+						<label>Assign</label>
+						<select {...register('Assign')} name='AssignTo'>
+							{ASSIGN.map((assignTo: string, index: number) => (
+								<option
+									key={index}
+									value={assignTo}
+									hidden={assignTo === 'Assign to'}
+									selected={assignTo === 'Assign to'}>
 									{assignTo}
 								</option>
 							))}
@@ -135,7 +141,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					</div>
 					<div className={styles.inputContainer}>
 						<label>Due Date</label>
-						<input type='datetime-local' id='due-date' name='DueDate' {...register('AssignTo')} />
+						<input type='datetime-local' id='due-date' name='DueDate' {...register('Assign')} />
 					</div>
 				</div>
 				<div className={styles.inputContainer}>
@@ -149,7 +155,9 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<button className={styles.button} type='submit'>
 						Submit
 					</button>
-					<button className={styles.button}>Clear</button>
+					<button className={styles.button} type='button' onClick={() => reset()}>
+						Clear
+					</button>
 				</div>
 			</form>
 		</div>
