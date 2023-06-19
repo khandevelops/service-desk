@@ -122,6 +122,9 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<label>Description</label>
 					<textarea rows={6} {...register('Description')} name='Description' />
 				</div>
+				<div>
+					<input type='file' name='file' />
+				</div>
 				<div className={styles.buttonGroup}>
 					<button className={styles.button} type='submit'>
 						Submit
