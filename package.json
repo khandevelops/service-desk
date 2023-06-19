@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/es6-collections": "^0.5.33"
+  }
+}

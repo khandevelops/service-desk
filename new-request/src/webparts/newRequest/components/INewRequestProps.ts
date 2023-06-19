@@ -15,5 +15,6 @@ export interface IRequest {
   RequesterEmail: string;
   CompletedBy?: string;
   CompletedTime?: Date;
-  Attachments?: any;
+  Attachments?: boolean;
+  Attached?: FileList;
 }

@@ -7,17 +7,18 @@ import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
 import '@pnp/sp/attachments';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ASSIGN_TO, CATEGORY, PRIORITY } from '../constants';
-import { IItem } from '@pnp/sp/items';
+import { IItemAddResult } from '@pnp/sp/items';
+// import { IItem } from '@pnp/sp/items';
 
 // import * as moment from 'moment';
 
 const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
-	const [subCategory, setSubCategory] = React.useState<string[]>([]);
+	const [subCategory, setSubCategory] = useState<string[]>([]);
 	const {
 		register,
 		handleSubmit,
@@ -25,16 +26,32 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		setValue,
 		watch
 	} = useForm<IRequest>();
+	const watchCategory = watch('Category');
 
-	const onSubmit: SubmitHandler<IRequest> = (data) => {
+	const onSubmit: SubmitHandler<IRequest> = (addRequestRequest: IRequest) => {
 		sp.web.lists
 			.getByTitle('Requests')
-			.items.add({ ...data })
-			.then((response) => {
-				const item: IItem = sp.web.lists.getByTitle('MyList').items.getById(response.data.Id);
-				item.attachmentFiles
-					.add('file2.txt', 'Here is my content')
-					.then((response) => console.log(response))
+			.items.add({
+				Subject: addRequestRequest.Subject,
+				Priority: addRequestRequest.Priority,
+				Category: addRequestRequest.Category,
+				SubCategory: addRequestRequest.SubCategory,
+				AssignTo: addRequestRequest.AssignTo,
+				DueDate: addRequestRequest.DueDate,
+				Description: addRequestRequest.Description,
+				RequesterEmail: addRequestRequest.RequesterEmail
+			})
+			.then((addRequestResponse: IItemAddResult) => {
+				addRequestRequest.Attached[0]
+					.arrayBuffer()
+					.then((buffer) => {
+						sp.web.lists
+							.getByTitle('Requests')
+							.items.getById(addRequestResponse.data.Id)
+							.attachmentFiles.add(addRequestRequest.Attached[0].name, buffer)
+							.then()
+							.catch((error: Error) => console.error(error.message));
+					})
 					.catch((error: Error) => console.error(error.message));
 			})
 			.catch((error: Error) => console.error(error.message));
@@ -44,13 +61,14 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 		sp.web
 			.currentUser()
 			.then((currentUser) => setValue('RequesterEmail', currentUser.Email))
-			.then(() => {
-				const subscription = watch((value) => {
-					setSubCategory(CATEGORY.filter((category) => category.CATEGORY === value.Category)[0].SUBCATEGORY);
-				});
-				return () => subscription.unsubscribe();
-			})
 			.catch((error: Error) => console.error(error.message));
+		const subscription = watch((value) => {
+			setSubCategory(
+				CATEGORY.filter((category) => category.CATEGORY === value.Category).length > 0 &&
+					CATEGORY.filter((category) => category.CATEGORY === value.Category)[0].SUBCATEGORY
+			);
+		});
+		return () => subscription.unsubscribe();
 	}, [watch]);
 
 	return (
@@ -93,11 +111,13 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 							<option value='null' selected disabled>
 								{subCategory.length === 0 ? '' : 'Select Sub Category'}
 							</option>
-							{subCategory.map((category: string, index: number) => (
-								<option key={index} value={category}>
-									{category}
-								</option>
-							))}
+							{watchCategory &&
+								subCategory.length > 0 &&
+								subCategory.map((category: string, index: number) => (
+									<option key={index} value={category}>
+										{category}
+									</option>
+								))}
 						</select>
 					</div>
 					<div className={styles.inputContainer}>
@@ -123,7 +143,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 					<textarea rows={6} {...register('Description')} name='Description' />
 				</div>
 				<div>
-					<input type='file' name='file' />
+					<input type='file' name='file' {...register('Attached')} />
 				</div>
 				<div className={styles.buttonGroup}>
 					<button className={styles.button} type='submit'>
