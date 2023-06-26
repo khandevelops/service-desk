@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "bluenet-service-request-client-side-solution",
+    "id": "c052bef5-1c80-49e6-a413-b4a0a786765a",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.17.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "bluenet-service-request description"
+      },
+      "longDescription": {
+        "default": "bluenet-service-request description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "bluenet-service-request Feature",
+        "description": "The feature that activates elements of the bluenet-service-request solution.",
+        "id": "6a42ff8b-a355-4527-9f0e-3c0713f4bae1",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/bluenet-service-request.sppkg"
+  }
+}

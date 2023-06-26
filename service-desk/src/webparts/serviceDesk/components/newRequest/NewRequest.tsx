@@ -1,20 +1,13 @@
 import * as React from 'react';
 import styles from './NewRequest.module.scss';
-import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { IRequest } from './INewRequestProps';
-import { SPFI, SPFx, spfi } from '@pnp/sp';
-import '@pnp/sp/webs';
-import '@pnp/sp/lists';
-import '@pnp/sp/items';
-import '@pnp/sp/site-users/web';
-import '@pnp/sp/attachments';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ASSIGN, CATEGORY, PRIORITY } from '../constants';
+import { ASSIGN, CATEGORY, PRIORITY } from '../../common/constants';
 import { IItemAddResult } from '@pnp/sp/items';
+import { SPFI } from '@pnp/sp';
 
-const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
-	const sp: SPFI = spfi().using(SPFx(context));
+const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 	const [subCategory, setSubCategory] = useState<string[]>([]);
 	const {
 		register,
@@ -141,7 +134,7 @@ const NewRequest = ({ context }: { context: WebPartContext }): JSX.Element => {
 				<input type='file' name='file' {...register('Attached')} />
 			</div>
 			<div className={styles.textArea}>
-				<label>Attachment</label>
+				<label>Description</label>
 				<textarea rows={6} {...register('Description')} name='Description' />
 			</div>
 			<div className={styles.buttonGroup}>

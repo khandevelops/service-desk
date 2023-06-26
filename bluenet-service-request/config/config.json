@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "bluenet-service-request-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/bluenetServiceRequest/BluenetServiceRequestWebPart.js",
+          "manifest": "./src/webparts/bluenetServiceRequest/BluenetServiceRequestWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "BluenetServiceRequestWebPartStrings": "lib/webparts/bluenetServiceRequest/loc/{locale}.js"
+  }
+}

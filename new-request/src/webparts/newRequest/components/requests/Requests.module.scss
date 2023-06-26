@@ -1,0 +1,22 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.requests {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	padding: 3rem 3rem 3rem 3rem;
+	table {
+		border-top: 1px solid #36454f;
+		border-bottom: 1px solid #36454f;
+		border-collapse: collapse;
+		width: 100%;
+	}
+	td,
+	th {
+		border-top: 1px solid #36454f;
+		border-bottom: 1px solid #36454f;
+		text-align: left;
+		padding: 8px;
+	}
+}

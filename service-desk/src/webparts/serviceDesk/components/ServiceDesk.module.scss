@@ -1,0 +1,17 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.serviceDesk {
+  display: grid;
+  height: 57vh;
+  width: 100%;
+  border: 1px solid red;
+  grid-template-columns: 1fr 4fr;
+  padding: 2rem 2rem 2rem 2rem;
+  .newRequest {
+    padding-right: 1rem;
+    border-right: 2px solid rgb(225, 225, 225);
+  }
+  .requests {
+    padding-left: 1rem;
+  }
+}
