@@ -5,10 +5,14 @@ import { useEffect, useState } from 'react';
 import { SPFI } from '@pnp/sp';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { IAttachmentInfo } from '@pnp/sp/attachments';
+import { Drawer } from '@mui/material';
+import { ISiteUserInfo } from '@pnp/sp/site-users/types';
+import RequestDetail from '../requestDetail/RequestDetail';
 
 const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 	const [requests, setRequests] = useState<IRequest[]>([]);
-	// const [currentUser, setCurrentUser] = useState< | null>(null);
+	const [openRequestDetail, setRequestDetail] = useState<boolean>(false);
+	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
 
 	useEffect(() => {
 		sp.web.lists
@@ -16,10 +20,11 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 			.items()
 			.then((response) => setRequests(response))
 			.catch((error: Error) => console.error(error.message));
-		// sp.web
-		// 	.currentUser()
-		// 	.then((response) => setCurrentUser(response))
-		// 	.catch((error: Error) => console.error(error.message));
+		sp.web
+			.currentUser()
+			.then((response) => setCurrentUser(response))
+			.then(() => console.log(currentUser))
+			.catch((error: Error) => console.error(error.message));
 	}, []);
 
 	const getAttachedFile = async (item: IRequest): Promise<IAttachmentInfo> => {
@@ -29,6 +34,9 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 
 	return (
 		<div className={styles.requests}>
+			<Drawer open={openRequestDetail} onClose={() => setRequestDetail(false)}>
+				<RequestDetail sp={sp} />
+			</Drawer>
 			{requests.length > 0 ? (
 				<table>
 					<tr>
@@ -57,9 +65,7 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 							<td>{request.CompletedTime}</td>
 							<td>{request.Attachment && getAttachedFile(request)}</td>
 							<td className={styles.icon}>
-								<a href='https://usdtl.sharepoint.com/Pages/Committees.aspx'>
-									<Icon iconName='MoreVertical' />
-								</a>
+								<Icon iconName='MoreVertical' onClick={() => setRequestDetail(true)} />
 							</td>
 						</tr>
 					))}

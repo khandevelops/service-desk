@@ -22,9 +22,6 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			<Drawer open={openNewRequestForm} onClose={() => setOpenNewRequestForm(false)}>
 				<NewRequest sp={sp} />
 			</Drawer>
-			<Drawer open={openNewRequestForm} onClose={() => setOpenNewRequestForm(false)}>
-				<RequestDetail sp={sp} />
-			</Drawer>
 			<div className={styles.requests}>
 				<div className={styles.requestTable}>
 					<Requests sp={sp} />
