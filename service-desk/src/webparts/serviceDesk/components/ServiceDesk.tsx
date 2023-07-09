@@ -11,7 +11,6 @@ import '@pnp/sp/site-users/web';
 import '@pnp/sp/attachments';
 import { useState } from 'react';
 import { Button, Drawer } from '@mui/material';
-import RequestDetail from './requestDetail/RequestDetail';
 
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
