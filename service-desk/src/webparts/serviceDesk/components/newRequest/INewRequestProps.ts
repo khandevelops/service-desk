@@ -5,7 +5,6 @@ export interface INewRequestProps {
 }
 
 export interface IRequest {
-  Subject: string;
   Priority: string;
   Category: string;
   SubCategory: string;

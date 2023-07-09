@@ -1,7 +1,7 @@
 import { IItem } from "@pnp/sp/items";
 
 export interface IRequest extends IItem {
-  Subject: string;
+  id: number;
   Priority: string;
   Category: string;
   SubCategory: string;

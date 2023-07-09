@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import Requests from './components/Requests';
-import { IRequestsProps } from './components/IRequestsProps';
+import { IRequestsProps } from './components/IRequests';
 
 export interface IRequestsWebPartProps {
   description: string;

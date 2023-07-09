@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "request-detail-client-side-solution",
+    "id": "d03d4987-7c8e-42b6-9e15-e29c5cb1bd07",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.17.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "request-detail description"
+      },
+      "longDescription": {
+        "default": "request-detail description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "request-detail Feature",
+        "description": "The feature that activates elements of the request-detail solution.",
+        "id": "1697ac6a-3983-4ee5-b67e-4da3a142ff21",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/request-detail.sppkg"
+  }
+}

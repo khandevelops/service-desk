@@ -3,10 +3,12 @@ import styles from './Requests.module.scss';
 import { IRequest } from './IRequest';
 import { useEffect, useState } from 'react';
 import { SPFI } from '@pnp/sp';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { IAttachmentInfo } from '@pnp/sp/attachments';
 
 const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 	const [requests, setRequests] = useState<IRequest[]>([]);
-	// const [currentUser, setCurrentUser] = useState<ICurrentUser | null>(null);
+	// const [currentUser, setCurrentUser] = useState< | null>(null);
 
 	useEffect(() => {
 		sp.web.lists
@@ -20,36 +22,45 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 		// 	.catch((error: Error) => console.error(error.message));
 	}, []);
 
+	const getAttachedFile = async (item: IRequest): Promise<IAttachmentInfo> => {
+		const attachedFile: IAttachmentInfo = await item.attachmentFiles.getByName('file.txt')();
+		return attachedFile;
+	};
+
 	return (
 		<div className={styles.requests}>
 			{requests.length > 0 ? (
 				<table>
 					<tr>
-						<th>Subject</th>
-						<th>Priority</th>
 						<th>Category</th>
 						<th>Sub Category</th>
-						<th>Assigned To</th>
 						<th>Description</th>
+						<th>Priority</th>
+						<th>Assigned To</th>
 						<th>Submitted By</th>
 						<th>Created Time</th>
 						<th>Completed By</th>
 						<th>Completed Time</th>
 						<th>Attachment</th>
+						<th className={styles.icon}>More</th>
 					</tr>
 					{requests.map((request, index) => (
 						<tr key={index}>
-							<td>{request.Subject}</td>
-							<td>{request.Priority}</td>
 							<td>{request.Category}</td>
 							<td>{request.SubCategory}</td>
-							<td>{request.AssignTo}</td>
 							<td>{request.Description}</td>
+							<td>{request.Priority}</td>
+							<td>{request.AssignTo}</td>
 							<td>{request.CreatedBy}</td>
 							<td>{request.CreatedOn}</td>
 							<td>{request.CompletedBy}</td>
 							<td>{request.CompletedTime}</td>
-							<td>{request.Attachment}</td>
+							<td>{request.Attachment && getAttachedFile(request)}</td>
+							<td className={styles.icon}>
+								<a href='https://usdtl.sharepoint.com/Pages/Committees.aspx'>
+									<Icon iconName='MoreVertical' />
+								</a>
+							</td>
 						</tr>
 					))}
 				</table>

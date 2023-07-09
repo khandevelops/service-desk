@@ -9,14 +9,7 @@ import { SPFI } from '@pnp/sp';
 
 const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 	const [subCategory, setSubCategory] = useState<string[]>([]);
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		setValue,
-		watch,
-		reset
-	} = useForm<IRequest>();
+	const { register, handleSubmit, setValue, watch, reset } = useForm<IRequest>();
 
 	const watchCategory = watch('Category');
 
@@ -24,7 +17,6 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.add({
-				Subject: addRequestRequest.Subject,
 				Priority: addRequestRequest.Priority,
 				Category: addRequestRequest.Category,
 				SubCategory: addRequestRequest.SubCategory,
@@ -70,21 +62,6 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 
 	return (
 		<form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
-			<div className={styles.input}>
-				<label>Subject</label>
-				<input {...register('Subject', { required: true })} name='Subject' />
-				{errors.Subject && <span className={styles.errorMessage}>This field is required</span>}
-			</div>
-			<div className={styles.select}>
-				<label>Priority</label>
-				<select {...register('Priority')} name='Priority'>
-					{PRIORITY.map((priority, index) => (
-						<option key={index} value={priority} selected={priority === 'NORMAL'}>
-							{priority}
-						</option>
-					))}
-				</select>
-			</div>
 			<div className={styles.select}>
 				<label>Category</label>
 				<select {...register('Category')} name='Category'>
@@ -116,6 +93,16 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 				</select>
 			</div>
 			<div className={styles.select}>
+				<label>Priority</label>
+				<select {...register('Priority')} name='Priority'>
+					{PRIORITY.map((priority, index) => (
+						<option key={index} value={priority} selected={priority === 'NORMAL'}>
+							{priority}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className={styles.select}>
 				<label>Assign</label>
 				<select {...register('Assign')} name='AssignTo'>
 					{ASSIGN.map((assignTo: string, index: number) => (
@@ -135,15 +122,10 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 			</div>
 			<div className={styles.textArea}>
 				<label>Description</label>
-				<textarea rows={6} {...register('Description')} name='Description' />
+				<textarea rows={5} {...register('Description')} name='Description' />
 			</div>
 			<div className={styles.buttonGroup}>
-				<button className={styles.button} type='submit'>
-					Submit
-				</button>
-				<button className={styles.button} type='button' onClick={() => reset()}>
-					Clear
-				</button>
+				<button type='submit'>Submit</button>
 			</div>
 		</form>
 

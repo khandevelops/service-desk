@@ -2,17 +2,21 @@
 
 .requests {
 	width: 100%;
+	font-size: small;
 	table {
-		border-top: 1px solid #36454f;
-		border-bottom: 1px solid #36454f;
+		border-top: 1px solid rgb(225, 225, 225);
+		border-bottom: 1px solid rgb(225, 225, 225);
 		border-collapse: collapse;
 		width: 100%;
 	}
 	td,
 	th {
-		border-top: 1px solid #36454f;
-		border-bottom: 1px solid #36454f;
+		border-top: 1px solid rgb(225, 225, 225);
+		border-bottom: 1px solid rgb(225, 225, 225);
 		text-align: left;
 		padding: 8px;
+	}
+	.icon {
+		text-align: center;
 	}
 }
