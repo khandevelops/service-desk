@@ -1,6 +1,7 @@
+import { SPFI } from '@pnp/sp';
 import * as React from 'react';
 
-const RequestDetail = (): JSX.Element => {
+const RequestDetail = ({ sp }: { sp: SPFI }): JSX.Element => {
 	return <div>RequestDetail</div>;
 };
 

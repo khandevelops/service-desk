@@ -10,39 +10,35 @@ import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
 import '@pnp/sp/attachments';
 import { useState } from 'react';
-
-type pageType = 'REQUESTS' | 'NEW_REQUEST' | 'REQUEST_DETAIL';
+import { Button, Drawer } from '@mui/material';
+import RequestDetail from './requestDetail/RequestDetail';
 
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
-	const [activePage, setActivePage] = useState<pageType>('REQUESTS');
+	const [openNewRequestForm, setOpenNewRequestForm] = useState<boolean>(false);
+
 	return (
 		<div className={styles.serviceDesk}>
-			{activePage === 'REQUESTS' && (
-				<div className={styles.requests}>
-					<div className={styles.requestTable}>
-						<Requests sp={sp} />
-					</div>
-					<div className={styles.buttonGroup}>
-						<button onClick={() => setActivePage('NEW_REQUEST')}>NEW REQUEST</button>
-					</div>
+			<Drawer open={openNewRequestForm} onClose={() => setOpenNewRequestForm(false)}>
+				<NewRequest sp={sp} />
+			</Drawer>
+			<Drawer open={openNewRequestForm} onClose={() => setOpenNewRequestForm(false)}>
+				<RequestDetail sp={sp} />
+			</Drawer>
+			<div className={styles.requests}>
+				<div className={styles.requestTable}>
+					<Requests sp={sp} />
 				</div>
-			)}
-			{activePage === 'NEW_REQUEST' && (
-				<div className={styles.newRequest}>
-					<div className={styles.newRequestForm}>
-						<NewRequest sp={sp} />
-					</div>
-					<div className={styles.buttonGroup}>
-						<button onClick={() => setActivePage('REQUESTS')}>Cancel</button>
-					</div>
+				<div className={styles.buttonGroup}>
+					<Button
+						onClick={() => setOpenNewRequestForm(true)}
+						variant='contained'
+						size='large'
+						sx={{ backgroundColor: '#1347a4' }}>
+						Click
+					</Button>
 				</div>
-			)}
-			{activePage === 'REQUEST_DETAIL' && (
-				<div className={styles.requestDetail}>
-					<NewRequest sp={sp} />
-				</div>
-			)}
+			</div>
 		</div>
 	);
 };
