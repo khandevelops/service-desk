@@ -18,5 +18,12 @@
 	}
 	.icon {
 		text-align: center;
+		button {
+			all: unset;
+			cursor: pointer;
+		}
+		button:focus {
+			outline: revert;
+		}
 	}
 }

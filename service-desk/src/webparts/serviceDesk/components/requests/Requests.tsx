@@ -11,7 +11,8 @@ import RequestDetail from '../requestDetail/RequestDetail';
 
 const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 	const [requests, setRequests] = useState<IRequest[]>([]);
-	const [openRequestDetail, setRequestDetail] = useState<boolean>(false);
+	const [requestDetail, setRequestDetail] = useState<IRequest | null>(null);
+	const [open, setOpen] = useState<boolean>(false);
 	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
 
 	useEffect(() => {
@@ -32,10 +33,19 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 		return attachedFile;
 	};
 
+	const handleMoreClick = (request: IRequest): void => {
+		setOpen(true);
+		setRequestDetail(request);
+	};
+
+	const handleCancel = (): void => {
+		setOpen(false);
+	};
+
 	return (
 		<div className={styles.requests}>
-			<Drawer open={openRequestDetail} onClose={() => setRequestDetail(false)}>
-				<RequestDetail sp={sp} />
+			<Drawer open={open} anchor='right' onClose={() => setOpen(false)}>
+				<RequestDetail sp={sp} requestDetail={requestDetail} handleCancel={handleCancel} />
 			</Drawer>
 			{requests.length > 0 ? (
 				<table>
@@ -65,7 +75,9 @@ const Requests = ({ sp }: { sp: SPFI }): JSX.Element => {
 							<td>{request.CompletedTime}</td>
 							<td>{request.Attachment && getAttachedFile(request)}</td>
 							<td className={styles.icon}>
-								<Icon iconName='MoreVertical' onClick={() => setRequestDetail(true)} />
+								<button>
+									<Icon iconName='MoreVertical' onClick={() => handleMoreClick(request)} />
+								</button>
 							</td>
 						</tr>
 					))}

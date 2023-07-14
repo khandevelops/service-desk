@@ -8,10 +8,12 @@ export interface IRequest extends IItem {
   AssignTo: string;
   DueDate: Date;
   Description: string;
+  Comment: string;
   CreatedOn: Date;
   CreatedBy: string;
   CompletedBy?: string;
   CompletedTime?: Date;
+  Complete: boolean;
   Attachment: boolean;
 }
 

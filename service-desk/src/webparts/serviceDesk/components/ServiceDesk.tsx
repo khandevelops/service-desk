@@ -14,26 +14,29 @@ import { Button, Drawer } from '@mui/material';
 
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
-	const [openNewRequestForm, setOpenNewRequestForm] = useState<boolean>(false);
+	const [open, setOpen] = useState<boolean>(false);
 
 	return (
-		<div className={styles.serviceDesk}>
-			<Drawer open={openNewRequestForm} onClose={() => setOpenNewRequestForm(false)}>
+		<div className={styles.container}>
+			<Drawer open={open} anchor='right' onClose={() => setOpen(false)}>
 				<NewRequest sp={sp} />
 			</Drawer>
-			<div className={styles.requests}>
-				<div className={styles.requestTable}>
-					<Requests sp={sp} />
-				</div>
-				<div className={styles.buttonGroup}>
-					<Button
-						onClick={() => setOpenNewRequestForm(true)}
-						variant='contained'
-						size='large'
-						sx={{ backgroundColor: '#1347a4' }}>
-						Click
-					</Button>
-				</div>
+			<div className={styles.headerContainer}>
+				<input type='search' />
+				<Button variant='text' size='large' sx={{ backgroundColor: '#fff', color: '#2f3643' }}>
+					NEW REQUEST
+				</Button>
+
+				{/* <Button
+					onClick={() => setOpen(true)}
+					variant='contained'
+					size='large'
+					sx={{ backgroundColor: '#1347a4' }}>
+					Click
+				</Button> */}
+			</div>
+			<div className={styles.bodyContainer}>
+				<Requests sp={sp} />
 			</div>
 		</div>
 	);
