@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { MouseEvent } from 'react';
 import styles from './NewRequest.module.scss';
 import { IRequest } from './INewRequestProps';
 import { useEffect, useState } from 'react';
@@ -6,10 +7,32 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { ASSIGN, CATEGORY, PRIORITY } from '../../common/constants';
 import { IItemAddResult } from '@pnp/sp/items';
 import { SPFI } from '@pnp/sp';
+import { Icon } from 'office-ui-fabric-react';
 
-const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
+const NewRequest = ({
+	sp,
+	closeNewRequestDrawer
+}: {
+	sp: SPFI;
+	closeNewRequestDrawer: (event: MouseEvent<HTMLElement>) => void;
+}): JSX.Element => {
 	const [subCategory, setSubCategory] = useState<string[]>([]);
-	const { register, handleSubmit, setValue, watch, reset } = useForm<IRequest>();
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		watch,
+		reset,
+		formState: { isValid }
+	} = useForm<IRequest>({
+		defaultValues: {
+			Category: null,
+			SubCategory: null,
+			Priority: 'NORMAL',
+			Assign: null,
+			Description: null
+		}
+	});
 
 	const watchCategory = watch('Category');
 
@@ -63,59 +86,71 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 	return (
 		<form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
 			<div className={styles.inputContainer}>
-				<div className={styles.select}>
+				<div className={styles.selectContainer}>
 					<label>Category</label>
-					<select {...register('Category')} name='Category'>
-						{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
-							<option
-								key={index}
-								value={category.CATEGORY}
-								hidden={category.CATEGORY === 'Select Category'}
-								selected={category.CATEGORY === 'Select Category'}>
-								{category.CATEGORY}
-							</option>
-						))}
-					</select>
-				</div>
-				<div className={styles.select}>
-					<label>Sub Category</label>
-					<select {...register('SubCategory')} name='SubCategory' disabled={subCategory.length === 0}>
-						{watchCategory &&
-							subCategory.length > 0 &&
-							subCategory.map((subCategory: string, index: number) => (
+					<div className={styles.select}>
+						<select {...register('Category', { required: true })} name='Category' required>
+							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
 								<option
 									key={index}
-									value={subCategory}
-									hidden={subCategory === 'Select Sub Category'}
-									selected={subCategory === 'Select Sub Category'}>
-									{subCategory}
+									value={category.CATEGORY}
+									hidden={category.CATEGORY === 'Select Category'}
+									selected={category.CATEGORY === 'Select Category'}>
+									{category.CATEGORY}
 								</option>
 							))}
-					</select>
+						</select>
+						<Icon iconName='ChevronDownMed' className={styles.icon} />
+					</div>
 				</div>
-				<div className={styles.select}>
+				<div className={styles.selectContainer}>
+					<label>Sub Category</label>
+					<div className={styles.select}>
+						<select {...register('SubCategory')} name='SubCategory' disabled={subCategory.length === 0}>
+							{watchCategory &&
+								subCategory.length > 0 &&
+								subCategory.map((subCategory: string, index: number) => (
+									<option
+										key={index}
+										value={subCategory}
+										hidden={subCategory === 'Select Sub Category'}
+										selected={subCategory === 'Select Sub Category'}>
+										{subCategory}
+									</option>
+								))}
+						</select>
+						<Icon iconName='ChevronDownMed' className={styles.icon} />
+					</div>
+				</div>
+				<div className={styles.selectContainer}>
 					<label>Priority</label>
-					<select {...register('Priority')} name='Priority'>
-						{PRIORITY.map((priority, index) => (
-							<option key={index} value={priority} selected={priority === 'NORMAL'}>
-								{priority}
-							</option>
-						))}
-					</select>
+					<div className={styles.select}>
+						<select {...register('Priority')} name='Priority'>
+							{PRIORITY.map((priority, index) => (
+								<option key={index} value={priority} selected={priority === 'NORMAL'}>
+									{priority}
+								</option>
+							))}
+						</select>
+						<Icon iconName='ChevronDownMed' className={styles.icon} />
+					</div>
 				</div>
-				<div className={styles.select}>
+				<div className={styles.selectContainer}>
 					<label>Assign</label>
-					<select {...register('Assign')} name='AssignTo'>
-						{ASSIGN.map((assignTo: string, index: number) => (
-							<option
-								key={index}
-								value={assignTo}
-								hidden={assignTo === 'Assign to'}
-								selected={assignTo === 'Assign to'}>
-								{assignTo}
-							</option>
-						))}
-					</select>
+					<div className={styles.select}>
+						<select {...register('Assign')} name='AssignTo'>
+							{ASSIGN.map((assignTo: string, index: number) => (
+								<option
+									key={index}
+									value={assignTo}
+									hidden={assignTo === 'Assign to'}
+									selected={assignTo === 'Assign to'}>
+									{assignTo}
+								</option>
+							))}
+						</select>
+						<Icon iconName='ChevronDownMed' className={styles.icon} />
+					</div>
 				</div>
 				<div className={styles.fileInput}>
 					<label>Attachment</label>
@@ -128,8 +163,10 @@ const NewRequest = ({ sp }: { sp: SPFI }): JSX.Element => {
 			</div>
 
 			<div className={styles.buttonGroup}>
-				<button type='submit'>Submit</button>
-				<button>Cancel</button>
+				<button type='submit' disabled={isValid}>
+					Submit
+				</button>
+				<button onClick={(event: MouseEvent<HTMLElement>) => closeNewRequestDrawer(event)}>Cancel</button>
 			</div>
 		</form>
 	);

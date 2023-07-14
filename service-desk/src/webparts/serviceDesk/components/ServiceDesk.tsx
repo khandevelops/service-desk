@@ -1,42 +1,171 @@
 import * as React from 'react';
+import { MouseEvent, ChangeEvent, Fragment, useEffect, useState } from 'react';
 import styles from './ServiceDesk.module.scss';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import NewRequest from './newRequest/NewRequest';
-import Requests from './requests/Requests';
 import { SPFI, SPFx, spfi } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
 import '@pnp/sp/attachments';
-import { useState } from 'react';
-import { Button, Drawer } from '@mui/material';
+import '@pnp/sp/search';
+import { IAttachmentInfo } from '@pnp/sp/attachments';
+import { Drawer } from '@mui/material';
+import { ISiteUserInfo } from '@pnp/sp/site-users/types';
+import RequestDetail from './requestDetail/RequestDetail';
+import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { SPComponentLoader } from '@microsoft/sp-loader';
+import { IRequest } from './IServiceDeskProps';
+SPComponentLoader.loadCss('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
+const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
+	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);
+
+	const getAttachedFile = async (item: IRequest): Promise<IAttachmentInfo> => {
+		const attachedFile: IAttachmentInfo = await item.attachmentFiles.getByName('file.txt')();
+		return attachedFile;
+	};
+
+	const closeRequestDetailDrawer = (event: MouseEvent<HTMLElement>): void => {
+		event.preventDefault();
+		setRequestDetailDrawer(false);
+	};
+
+	const openRequestDetailDrawer = (): void => {
+		setRequestDetailDrawer(true);
+	};
+
+	return (
+		<Fragment>
+			<Drawer open={requestDetailDrawer} anchor='right'>
+				<RequestDetail sp={sp} request={request} closeRequestDetailDrawer={closeRequestDetailDrawer} />
+			</Drawer>
+			<tr>
+				<td>{request.Category}</td>
+				<td>{request.SubCategory}</td>
+				<td>{request.Description}</td>
+				<td>{request.Priority}</td>
+				<td>{request.AssignTo}</td>
+				<td>{request.CreatedBy}</td>
+				<td>{request.CreatedOn}</td>
+				<td>{request.CompletedBy}</td>
+				<td>{request.CompletedTime}</td>
+				<td>{request.Attachment && getAttachedFile(request)}</td>
+				<td className={styles.more} onClick={openRequestDetailDrawer}>
+					<i className='fa fa-ellipsis-v' aria-hidden='true' />
+				</td>
+			</tr>
+		</Fragment>
+	);
+};
 
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
-	const [open, setOpen] = useState<boolean>(false);
+	const [newRequestDrawer, setNewRequestDrawer] = useState<boolean>(false);
+	const [pagedRequests, setPagesRequests] = useState<IRequest[]>([]);
+	// const [pagedRequests, setPagedRequests] = useState<{ hasNext: boolean; results: IRequest[] }>({
+	// 	hasNext: false,
+	// 	results: []
+	// });
+	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
+	const [totalPage, setTotalPage] = useState<number>(0);
+	const [page, setPage] = useState<number>(0);
+
+	useEffect(() => {
+		sp.web.lists
+			.getByTitle('Requests')
+			.items()
+			.then((response) => {
+				setTotalPage(response.length);
+				setPagesRequests(response.splice(page * 100, response.length - 1));
+			})
+			.catch((error: Error) => console.error(error.message));
+
+		sp.web
+			.currentUser()
+			.then((response) => setCurrentUser(response))
+			.then(() => console.log(currentUser))
+			.catch((error: Error) => console.error(error.message));
+	}, []);
+
+	const changePage = (): void => {
+		setPage(1);
+	};
+
+	const openNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
+		event.preventDefault();
+		setNewRequestDrawer(true);
+	};
+
+	const closeNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
+		event.preventDefault();
+		setNewRequestDrawer(false);
+	};
+
+	const searchTable = (event: ChangeEvent<HTMLInputElement>): void => {
+		if (event.target.value) {
+			sp.web.lists
+				.getByTitle('Requests')
+				.items.filter(
+					`substringof('${event.target.value}',Category) or substringof('${event.target.value}',SubCategory)`
+				)()
+				.then((response) => {
+					setTotalPage(response.length);
+					setPagesRequests(response);
+				})
+				.catch((error: Error) => console.error(error.message));
+		}
+	};
 
 	return (
 		<div className={styles.container}>
-			<Drawer open={open} anchor='right' onClose={() => setOpen(false)}>
-				<NewRequest sp={sp} />
+			<Drawer open={newRequestDrawer} anchor='right'>
+				<NewRequest sp={sp} closeNewRequestDrawer={closeNewRequestDrawer} />
 			</Drawer>
 			<div className={styles.headerContainer}>
-				<input type='search' />
-				<Button variant='text' size='large' sx={{ backgroundColor: '#fff', color: '#2f3643' }}>
-					NEW REQUEST
-				</Button>
+				<div className={styles.search}>
+					<Icon iconName='SearchArt64' className={styles.icon} />
+					<input type='search' onChange={searchTable} />
+				</div>
 
-				{/* <Button
-					onClick={() => setOpen(true)}
-					variant='contained'
-					size='large'
-					sx={{ backgroundColor: '#1347a4' }}>
-					Click
-				</Button> */}
+				<button onClick={openNewRequestDrawer}>NEW REQUEST</button>
 			</div>
 			<div className={styles.bodyContainer}>
-				<Requests sp={sp} />
+				<div className={styles.container}>
+					<div className={styles.requests}>
+						{pagedRequests.length > 0 ? (
+							<table>
+								<tr>
+									<th>Category</th>
+									<th>Sub Category</th>
+									<th>Description</th>
+									<th>Priority</th>
+									<th>Assigned To</th>
+									<th>Submitted By</th>
+									<th>Created Time</th>
+									<th>Completed By</th>
+									<th>Completed Time</th>
+									<th>Attachment</th>
+									<th className={styles.iconHeader}>More</th>
+								</tr>
+								{pagedRequests.map((request, index) => (
+									<TableBody key={index} request={request} sp={sp} />
+								))}
+							</table>
+						) : (
+							<div>There are no request for you</div>
+						)}
+					</div>
+					<div className={styles.pagination}>
+						<div>{page + 1 + ' - ' + (page + 99) + ' of ' + totalPage}</div>
+						<Icon iconName='ChevronLeftEnd6' />
+						<Icon iconName='ChevronLeftSmall' onClick={changePage} />
+						<div className={page + ' ' + styles.pageNumber}>{page + 1}</div>
+						<Icon iconName='ChevronRightSmall' />
+						<Icon iconName='ChevronRightEnd6' />
+					</div>
+				</div>
 			</div>
 		</div>
 	);

@@ -1,5 +1,6 @@
 import { SPFI } from '@pnp/sp';
 import * as React from 'react';
+import { MouseEvent, useEffect } from 'react';
 import { IRequest } from '../requests/IRequest';
 import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -7,21 +8,24 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 
 const RequestDetail = ({
 	sp,
-	requestDetail,
-	handleCancel
+	request,
+	closeRequestDetailDrawer
 }: {
 	sp: SPFI;
-	requestDetail: IRequest;
-	handleCancel: { (): void };
+	request: IRequest;
+	closeRequestDetailDrawer: { (event: MouseEvent<HTMLElement>): void };
 }): JSX.Element => {
+	useEffect(() => {
+		console.log(request);
+	}, []);
 	const { register, handleSubmit } = useForm<IRequest>();
 
 	const onSubmit: SubmitHandler<IRequest> = (request: IRequest) => {
 		sp.web.lists
 			.getByTitle('Requests')
-			.items.getById(requestDetail.id)
+			.items.getById(request.id)
 			.update({
-				...requestDetail,
+				...request,
 				Comment: request.Comment,
 				Complete: true
 			})
@@ -38,7 +42,7 @@ const RequestDetail = ({
 			</div>
 			<div className={styles.buttonGroup}>
 				<button type='submit'>Complete</button>
-				<button onClick={handleCancel}>Cancel</button>
+				<button onClick={closeRequestDetailDrawer}>Cancel</button>
 			</div>
 		</form>
 	);

@@ -1,29 +1,43 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
-.requests {
+.container {
 	width: 100%;
-	font-size: small;
-	table {
-		border-top: 1px solid rgb(225, 225, 225);
-		border-bottom: 1px solid rgb(225, 225, 225);
-		border-collapse: collapse;
+	.requests {
 		width: 100%;
-	}
-	td,
-	th {
-		border-top: 1px solid rgb(225, 225, 225);
-		border-bottom: 1px solid rgb(225, 225, 225);
-		text-align: left;
-		padding: 8px;
-	}
-	.icon {
-		text-align: center;
-		button {
-			all: unset;
+		height: 58vh;
+		font-size: small;
+		overflow-x: hidden; /* Hide horizontal scrollbar */
+		overflow-y: scroll; /* Add vertical scrollbar */
+		table {
+			border-top: 1px solid rgb(225, 225, 225);
+			border-bottom: 1px solid rgb(225, 225, 225);
+			border-collapse: collapse;
+			width: 100%;
+		}
+		td,
+		th {
+			border-top: 1px solid rgb(225, 225, 225);
+			border-bottom: 1px solid rgb(225, 225, 225);
+			text-align: left;
+			padding: 8px;
+		}
+		.iconHeader {
+			text-align: center;
+		}
+		.more {
+			text-align: center;
 			cursor: pointer;
 		}
-		button:focus {
-			outline: revert;
+	}
+	.pagination {
+		display: flex;
+		width: 100%;
+		justify-content: end;
+		padding-right: 4rem;
+		gap: 2rem;
+		margin-top: 2.5rem;
+		.pageNumber {
+			margin: 0 2rem;
 		}
 	}
 }

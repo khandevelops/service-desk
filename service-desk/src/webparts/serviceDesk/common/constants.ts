@@ -1,6 +1,6 @@
 export const PRIORITY = ['Normal', 'High']
 export const ASSIGN = [
-    'Assign to',
+
     "Accessioning",
     "Order entry",
     "Specimen storage",
@@ -8,10 +8,8 @@ export const ASSIGN = [
     "Confirmation aliquoting",
     "Mass spec"]
 export const CATEGORY = [
-    { CATEGORY: 'Select Category', SUBCATEGORY: [] },
     {
         CATEGORY: 'Batch Corrections', SUBCATEGORY: [
-            'Select sub category',
             'Sample reinjections',
             'Batch reinjections',
             'Batch reprocess',
@@ -22,7 +20,6 @@ export const CATEGORY = [
     { CATEGORY: 'Batches Ready For Review', SUBCATEGORY: [] },
     {
         CATEGORY: 'FAC Corrections', SUBCATEGORY: [
-            'Select sub category',
             'Improper integration/peak selection',
             'Control/sample/batch failed acceptance criteria',
             'Incomplete chain of custody',
@@ -36,7 +33,6 @@ export const CATEGORY = [
     },
     {
         CATEGORY: 'Announcement', SUBCATEGORY: [
-            'Select sub category',
             'Helpline',
             'Interdepartmental Info',
             'Others'
