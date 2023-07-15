@@ -86,7 +86,8 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.items.top(5000)()
 			.then((response) => {
 				setTotalPage(response.length);
-				setRequests(response.sort((requestA, requestB) => requestB.id - requestA.id).splice(page * 15, 15));
+				console.log(response);
+				setRequests(response.sort((requestA, requestB) => requestA.id - requestB.id).splice(page * 15, 15));
 			})
 			.catch((error: Error) => console.error(error.message));
 
