@@ -201,7 +201,8 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 							' - ' +
 							(totalPage - (page + 1) * 15 - 15 > -1 ? (page + 1) * 15 : totalPage) +
 							' of ' +
-							totalPage}
+							totalPage}{' '}
+						page
 					</div>
 					<button
 						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, pagination.FIRST_PAGE)}
