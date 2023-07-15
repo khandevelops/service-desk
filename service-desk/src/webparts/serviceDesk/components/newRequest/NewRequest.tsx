@@ -38,7 +38,7 @@ const NewRequest = ({
 
 	const watchCategory = watch('Category');
 
-	const onSubmit: SubmitHandler<IRequest> = (addRequestRequest: IRequest) => {
+	const onSubmit: SubmitHandler<IRequest> = (addRequestRequest: IRequest, event: MouseEvent<HTMLElement>) => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.add({
@@ -63,7 +63,7 @@ const NewRequest = ({
 						})
 						.catch((error: Error) => console.error(error.message));
 				} else {
-					reset();
+					closeNewRequestDrawer(event);
 				}
 			})
 			.catch((error: Error) => console.error(error.message));
