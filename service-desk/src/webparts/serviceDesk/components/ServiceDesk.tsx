@@ -86,7 +86,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.items.top(5000)()
 			.then((response) => {
 				setTotalPage(response.length);
-				setRequests(response.splice(page * 15, 15));
+				setRequests(response.sort((requestA, requestB) => requestB.id - requestA.id).splice(page * 15, 15));
 			})
 			.catch((error: Error) => console.error(error.message));
 
@@ -104,7 +104,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 				setPage(page - 1);
 			}
 		} else if (pageAction === pagination.NEXT_PAGE) {
-			if (totalPage - ((page + 1) * 15 - 15) > -1) {
+			if (totalPage > (page + 1) * 15 - 30) {
 				setPage(page + 1);
 			}
 		}
@@ -198,7 +198,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 						{page * 15 +
 							1 +
 							' - ' +
-							(totalPage - (page + 1) * 15 > 15 ? (page + 1) * 15 : totalPage - (page + 1) * 15) +
+							(totalPage - (page + 1) * 15 - 15 > -1 ? (page + 1) * 15 : totalPage) +
 							' of ' +
 							totalPage}
 					</div>
