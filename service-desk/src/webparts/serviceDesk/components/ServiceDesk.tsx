@@ -116,10 +116,10 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 						substringof('${event.target.value}', SubCategory) or
 						substringof('${event.target.value}', Description) or
 						substringof('${event.target.value}', Priority) or
-						substringof('${event.target.value}', Assign) or
+						substringof('${event.target.value}', AssignedTo) or
+						substringof('${event.target.value}', SubmittedBy) or
+						substringof('${event.target.value}', CompletedBy) or
 						substringof('${event.target.value}', Comment) or
-						substringof('${event.target.value}', SubCategory) or
-						substringof('${event.target.value}', SubCategory) or
 					`
 				)()
 				.then((response) => {
