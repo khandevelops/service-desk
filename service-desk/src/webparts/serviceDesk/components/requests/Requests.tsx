@@ -8,7 +8,7 @@ import { Drawer } from '@mui/material';
 import { ISiteUserInfo } from '@pnp/sp/site-users/types';
 import RequestDetail from '../requestDetail/RequestDetail';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
-import { IRequest } from '../IServiceDeskProps';
+import { IRequest } from '../IServiceDesk';
 
 const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
 	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);

@@ -7,7 +7,7 @@ import { ASSIGN, CATEGORY, PRIORITY } from '../../common/constants';
 import { IItemAddResult } from '@pnp/sp/items';
 import { SPFI } from '@pnp/sp';
 import { Icon } from 'office-ui-fabric-react';
-import { IRequest } from '../IServiceDeskProps';
+import { IRequest } from '../IServiceDesk';
 
 const NewRequest = ({
 	sp,

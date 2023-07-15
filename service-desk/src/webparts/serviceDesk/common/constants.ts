@@ -39,3 +39,10 @@ export const CATEGORY = [
         ]
     }
 ]
+
+export const pagination = {
+    FIRST_PAGE: 'FIRST_PAGE',
+    LAST_PAGE: 'LAST_PAGE',
+    PREVIOUS_PAGE: 'PREVIOUS_PAGE',
+    NEXT_PAGE: 'NEXT_PAGE'
+}

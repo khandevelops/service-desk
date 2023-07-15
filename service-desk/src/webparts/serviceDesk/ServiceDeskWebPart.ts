@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import ServiceDesk from './components/ServiceDesk';
-import { IServiceDeskProps } from './components/IServiceDeskProps';
+import { IServiceDeskProps } from './components/IServiceDesk';
 
 export interface IServiceDeskWebPartProps {
   description: string;

@@ -1,13 +1,12 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { IItem } from "@pnp/sp/items";
 
 export interface IServiceDeskProps {
   context: WebPartContext
 }
 
-import { IItem } from "@pnp/sp/items";
-
-export interface IRequest extends IItem {
-  id: number;
+export interface IRequest extends Partial<IItem> {
+  id?: number;
   Category: string;
   SubCategory: string;
   Description: string;
@@ -20,7 +19,7 @@ export interface IRequest extends IItem {
   Completed: boolean;
   Comment: string;
   Attachment: boolean;
-  File: FileList;
+  File?: FileList;
 }
 
 export interface ICurrentUser {

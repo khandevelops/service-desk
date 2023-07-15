@@ -3,7 +3,7 @@ import * as React from 'react';
 import { MouseEvent, useEffect } from 'react';
 import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { IRequest } from '../IServiceDeskProps';
+import { IRequest } from '../IServiceDesk';
 // import { useEffect } from 'react';
 
 const RequestDetail = ({
