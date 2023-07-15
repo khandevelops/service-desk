@@ -69,7 +69,11 @@ const Requests = ({ sp, keyword }: { sp: SPFI; keyword: string }): JSX.Element =
 				.items.top((page + 1) * 100)()
 				.then((response) => {
 					setTotalPage(response.length);
-					setPagesRequests(response.splice(page * 100, response.length - 1));
+					setPagesRequests(
+						response
+							.sort((requestA, requestB) => requestB - requestA)
+							.splice(page * 100, response.length - 1)
+					);
 				})
 				.catch((error: Error) => console.error(error.message));
 		} else {
