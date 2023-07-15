@@ -66,6 +66,7 @@ const NewRequest = ({
 					closeNewRequestDrawer(event);
 				}
 			})
+			.then(() => closeNewRequestDrawer(event))
 			.catch((error: Error) => console.error(error.message));
 	};
 

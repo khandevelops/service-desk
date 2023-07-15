@@ -1,10 +1,9 @@
 import { SPFI } from '@pnp/sp';
 import * as React from 'react';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent } from 'react';
 import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IRequest } from '../IServiceDesk';
-// import { useEffect } from 'react';
 
 const RequestDetail = ({
 	sp,
@@ -15,23 +14,21 @@ const RequestDetail = ({
 	request: IRequest;
 	closeRequestDetailDrawer: { (event: MouseEvent<HTMLElement>): void };
 }): JSX.Element => {
-	useEffect(() => {
-		console.log(request);
-	}, []);
 	const { register, handleSubmit } = useForm<IRequest>();
 
-	const onSubmit: SubmitHandler<IRequest> = (request: IRequest) => {
+	const onSubmit: SubmitHandler<IRequest> = (request: IRequest, event: MouseEvent<HTMLElement>) => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.getById(request.id)
 			.update({
 				...request,
 				Comment: request.Comment,
-				Complete: true
+				Completed: true
 			})
-			.then()
+			.then(() => closeRequestDetailDrawer(event))
 			.catch((error: Error) => console.error(error.message));
 	};
+
 	return (
 		<form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
 			<div>
