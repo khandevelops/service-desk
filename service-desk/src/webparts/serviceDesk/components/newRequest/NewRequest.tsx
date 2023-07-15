@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { MouseEvent } from 'react';
 import styles from './NewRequest.module.scss';
-import { IRequest } from './INewRequestProps';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ASSIGN, CATEGORY, PRIORITY } from '../../common/constants';
 import { IItemAddResult } from '@pnp/sp/items';
 import { SPFI } from '@pnp/sp';
 import { Icon } from 'office-ui-fabric-react';
+import { IRequest } from '../IServiceDeskProps';
 
 const NewRequest = ({
 	sp,
@@ -24,13 +24,15 @@ const NewRequest = ({
 		watch,
 		reset,
 		formState: { isValid }
-	} = useForm<IRequest>({
+	} = useForm<IRequest & { File: FileList }>({
 		defaultValues: {
 			Category: null,
 			SubCategory: null,
 			Priority: 'NORMAL',
-			Assign: null,
-			Description: null
+			AssignedTo: null,
+			Description: null,
+			SubmittedBy: null,
+			File: null
 		}
 	});
 
@@ -43,20 +45,19 @@ const NewRequest = ({
 				Priority: addRequestRequest.Priority,
 				Category: addRequestRequest.Category,
 				SubCategory: addRequestRequest.SubCategory,
-				Assign: addRequestRequest.Assign,
-				DueDate: addRequestRequest.DueDate,
+				Assign: addRequestRequest.AssignedTo,
 				Description: addRequestRequest.Description,
-				RequesterEmail: addRequestRequest.RequesterEmail
+				SubmittedBy: addRequestRequest.SubmittedBy
 			})
 			.then((addRequestResponse: IItemAddResult) => {
-				if (addRequestRequest.Attached.length > 0) {
-					addRequestRequest.Attached[0]
+				if (addRequestRequest.File.length > 0) {
+					addRequestRequest.File[0]
 						.arrayBuffer()
 						.then((buffer) => {
 							sp.web.lists
 								.getByTitle('Requests')
 								.items.getById(addRequestResponse.data.Id)
-								.attachmentFiles.add(addRequestRequest.Attached[0].name, buffer)
+								.attachmentFiles.add(addRequestRequest.File[0].name, buffer)
 								.then(() => reset())
 								.catch((error: Error) => console.error(error.message));
 						})
@@ -71,7 +72,7 @@ const NewRequest = ({
 	useEffect(() => {
 		sp.web
 			.currentUser()
-			.then((currentUser) => setValue('RequesterEmail', currentUser.Email))
+			.then((currentUser) => setValue('SubmittedBy', currentUser.Title))
 			.catch((error: Error) => console.error(error.message));
 		const subscription = watch((value) => {
 			setSubCategory(
@@ -138,7 +139,7 @@ const NewRequest = ({
 				<div className={styles.selectContainer}>
 					<label>Assign</label>
 					<div className={styles.select}>
-						<select {...register('Assign')} name='AssignTo'>
+						<select {...register('AssignedTo')} name='AssignedTo'>
 							{ASSIGN.map((assignTo: string, index: number) => (
 								<option
 									key={index}
@@ -154,7 +155,7 @@ const NewRequest = ({
 				</div>
 				<div className={styles.fileInput}>
 					<label>Attachment</label>
-					<input type='file' name='file' {...register('Attached')} />
+					<input type='file' name='file' {...register('File')} />
 				</div>
 				<div className={styles.textArea}>
 					<label>Description</label>

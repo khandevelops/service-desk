@@ -1,9 +1,9 @@
 import { SPFI } from '@pnp/sp';
 import * as React from 'react';
 import { MouseEvent, useEffect } from 'react';
-import { IRequest } from '../requests/IRequest';
 import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { IRequest } from '../IServiceDeskProps';
 // import { useEffect } from 'react';
 
 const RequestDetail = ({

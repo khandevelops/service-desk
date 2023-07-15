@@ -8,19 +8,19 @@ import { IItem } from "@pnp/sp/items";
 
 export interface IRequest extends IItem {
   id: number;
-  Priority: string;
   Category: string;
   SubCategory: string;
-  AssignTo: string;
-  DueDate: Date;
   Description: string;
-  Comment: string;
-  CreatedOn: Date;
-  CreatedBy: string;
+  Priority: string;
+  AssignedTo: string;
+  SubmittedBy: string;
+  CreatedTime: Date;
   CompletedBy?: string;
   CompletedTime?: Date;
-  Complete: boolean;
+  Completed: boolean;
+  Comment: string;
   Attachment: boolean;
+  File: FileList;
 }
 
 export interface ICurrentUser {

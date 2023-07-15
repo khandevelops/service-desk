@@ -10,6 +10,7 @@ import '@pnp/sp/items';
 import '@pnp/sp/site-users/web';
 import '@pnp/sp/attachments';
 import '@pnp/sp/search';
+import '@pnp/sp/items/get-all';
 import { IAttachmentInfo } from '@pnp/sp/attachments';
 import { Drawer } from '@mui/material';
 import { ISiteUserInfo } from '@pnp/sp/site-users/types';
@@ -46,9 +47,9 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 				<td>{request.SubCategory}</td>
 				<td>{request.Description}</td>
 				<td>{request.Priority}</td>
-				<td>{request.AssignTo}</td>
-				<td>{request.CreatedBy}</td>
-				<td>{request.CreatedOn}</td>
+				<td>{request.AssignedTo}</td>
+				<td>{request.SubmittedBy}</td>
+				<td>{request.CreatedTime}</td>
 				<td>{request.CompletedBy}</td>
 				<td>{request.CompletedTime}</td>
 				<td>{request.Attachment && getAttachedFile(request)}</td>
@@ -63,7 +64,8 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const sp: SPFI = spfi().using(SPFx(context));
 	const [newRequestDrawer, setNewRequestDrawer] = useState<boolean>(false);
-	const [pagedRequests, setPagesRequests] = useState<IRequest[]>([]);
+	// const [pagedRequests, setPagedRequests] = useState<IRequest[]>([]);
+	const [requests, setRequests] = useState<IRequest[]>([]);
 	// const [pagedRequests, setPagedRequests] = useState<{ hasNext: boolean; results: IRequest[] }>({
 	// 	hasNext: false,
 	// 	results: []
@@ -77,8 +79,9 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.getByTitle('Requests')
 			.items()
 			.then((response) => {
+				console.log(response);
 				setTotalPage(response.length);
-				setPagesRequests(response.splice(page * 100, response.length - 1));
+				setRequests(response);
 			})
 			.catch((error: Error) => console.error(error.message));
 
@@ -104,15 +107,24 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	};
 
 	const searchTable = (event: ChangeEvent<HTMLInputElement>): void => {
+		console.log(event.target);
 		if (event.target.value) {
 			sp.web.lists
 				.getByTitle('Requests')
 				.items.filter(
-					`substringof('${event.target.value}',Category) or substringof('${event.target.value}',SubCategory)`
+					`substringof('${event.target.value}', Category) or 
+						substringof('${event.target.value}', SubCategory) or
+						substringof('${event.target.value}', Description) or
+						substringof('${event.target.value}', Priority) or
+						substringof('${event.target.value}', Assign) or
+						substringof('${event.target.value}', Comment) or
+						substringof('${event.target.value}', SubCategory) or
+						substringof('${event.target.value}', SubCategory) or
+					`
 				)()
 				.then((response) => {
 					setTotalPage(response.length);
-					setPagesRequests(response);
+					setRequests(response);
 				})
 				.catch((error: Error) => console.error(error.message));
 		}
@@ -134,7 +146,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			<div className={styles.bodyContainer}>
 				<div className={styles.container}>
 					<div className={styles.requests}>
-						{pagedRequests.length > 0 ? (
+						{requests.length > 0 ? (
 							<table>
 								<tr>
 									<th>Category</th>
@@ -149,7 +161,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 									<th>Attachment</th>
 									<th className={styles.iconHeader}>More</th>
 								</tr>
-								{pagedRequests.map((request, index) => (
+								{requests.map((request, index) => (
 									<TableBody key={index} request={request} sp={sp} />
 								))}
 							</table>

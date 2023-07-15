@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Fragment, MouseEvent } from 'react';
 import styles from './Requests.module.scss';
-import { IRequest } from './IRequest';
 import { useEffect, useState } from 'react';
 import { SPFI } from '@pnp/sp';
 import { IAttachmentInfo } from '@pnp/sp/attachments';
@@ -9,6 +8,7 @@ import { Drawer } from '@mui/material';
 import { ISiteUserInfo } from '@pnp/sp/site-users/types';
 import RequestDetail from '../requestDetail/RequestDetail';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { IRequest } from '../IServiceDeskProps';
 
 const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
 	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);
@@ -37,9 +37,9 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 				<td>{request.SubCategory}</td>
 				<td>{request.Description}</td>
 				<td>{request.Priority}</td>
-				<td>{request.AssignTo}</td>
-				<td>{request.CreatedBy}</td>
-				<td>{request.CreatedOn}</td>
+				<td>{request.AssignedTo}</td>
+				<td>{request.SubmittedBy}</td>
+				<td>{request.CreatedTime}</td>
 				<td>{request.CompletedBy}</td>
 				<td>{request.CompletedTime}</td>
 				<td>{request.Attachment && getAttachedFile(request)}</td>
