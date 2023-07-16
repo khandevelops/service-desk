@@ -19,7 +19,7 @@ const RequestDetail = ({
 	const onSubmit: SubmitHandler<IRequest> = (request: IRequest, event: MouseEvent<HTMLElement>) => {
 		sp.web.lists
 			.getByTitle('Requests')
-			.items.getById(request.id)
+			.items.getById(request.Id)
 			.update({
 				...request,
 				Comment: request.Comment,

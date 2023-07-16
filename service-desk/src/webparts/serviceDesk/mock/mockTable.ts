@@ -20,7 +20,7 @@ export const mockTable = (numberOfRequests: number, sp: SPFI, title: string): IR
             Comment: 'Ea incididunt velit aute fugiat exercitation ullamco excepteur et irure occaecat irure voluptate dolor. Ad anim quis velit nostrud irure adipisicing ipsum. Occaecat Lorem pariatur consequat dolor. Laboris minim commodo proident sint anim proident nulla tempor do. Fugiat reprehenderit nulla velit duis cupidatat aliqua.',
 
         })
-            .then((result: IItemAddResult) => console.log(result))
+            .then((result: IItemAddResult) => result)
             .catch((error: Error) => console.error(error.message))
         numberOfRequests -= 1;
     }

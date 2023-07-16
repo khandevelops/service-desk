@@ -1,6 +1,12 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .container {
+	a {
+		text-align: center;
+		color: #1347a4;
+		cursor: pointer;
+		text-decoration: none;
+	}
 	::-webkit-scrollbar {
 		display: none;
 	}

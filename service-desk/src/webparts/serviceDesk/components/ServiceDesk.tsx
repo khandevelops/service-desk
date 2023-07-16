@@ -21,16 +21,26 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 // import { mockTable } from '../mock/mockTable';
 import { IRequest } from './IServiceDesk';
-import { pagination } from '../common/constants';
+import { PAGINATION } from '../common/constants';
+// import { IItem } from '@pnp/sp/items';
 SPComponentLoader.loadCss('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
 const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
 	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);
+	const [attachedFiles, setAttachedFiles] = useState<IAttachmentInfo[]>([]);
 
-	const getAttachedFile = async (item: IRequest): Promise<IAttachmentInfo> => {
-		const attachedFile: IAttachmentInfo = await item.attachmentFiles.getByName('file.txt')();
-		return attachedFile;
-	};
+	useEffect(() => {
+		if (request.Attachments) {
+			sp.web.lists
+				.getByTitle('Requests')
+				.items.getById(request.Id)
+				.attachmentFiles()
+				.then((response) => {
+					setAttachedFiles(response);
+				})
+				.catch((error: Error) => console.error(error.message));
+		}
+	}, []);
 
 	const closeRequestDetailDrawer = (event: MouseEvent<HTMLElement>): void => {
 		event.preventDefault();
@@ -56,7 +66,18 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 				<td>{request.CreatedTime}</td>
 				<td>{request.CompletedBy}</td>
 				<td>{request.CompletedTime}</td>
-				<td>{request.Attachment && getAttachedFile(request)}</td>
+				<td>
+					{request.Attachments && attachedFiles.length > 0 && (
+						<a
+							href={`https://usdtl.sharepoint.com/${attachedFiles[0].ServerRelativeUrl}`}
+							target='_blank'
+							rel='noreferrer'>
+							{attachedFiles[0].FileName.length > 50
+								? attachedFiles[0].FileName.slice(0, 50) + '...'
+								: attachedFiles[0].FileName}
+						</a>
+					)}
+				</td>
 				<td className={styles.more} onClick={openRequestDetailDrawer}>
 					<i className='fa fa-ellipsis-v' aria-hidden='true' />
 				</td>
@@ -79,6 +100,17 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
 	const [totalPage, setTotalPage] = useState<number>(0);
 	const [page, setPage] = useState<number>(0);
+	const [paginationDisabled, setPaginationDisabled] = useState<{
+		FIRST_PAGE: boolean;
+		LAST_PAGE: boolean;
+		PREVIOUS_PAGE: boolean;
+		NEXT_PAGE: boolean;
+	}>({
+		FIRST_PAGE: true,
+		LAST_PAGE: false,
+		PREVIOUS_PAGE: true,
+		NEXT_PAGE: false
+	});
 
 	useEffect(() => {
 		sp.web.lists
@@ -86,7 +118,6 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.items.top(5000)()
 			.then((response) => {
 				setTotalPage(response.length);
-				console.log(response);
 				setRequests(response.sort((requestA, requestB) => requestA.Id - requestB.Id).splice(page * 15, 15));
 			})
 			.catch((error: Error) => console.error(error.message));
@@ -94,18 +125,19 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 		sp.web
 			.currentUser()
 			.then((response) => setCurrentUser(response))
-			.then(() => console.log(currentUser))
+			.then(() => currentUser)
 			.catch((error: Error) => console.error(error.message));
 	}, [page]);
 
 	const changePage = (event: MouseEvent<HTMLElement>, pageAction: string): void => {
 		event.preventDefault();
-		if (pageAction === pagination.PREVIOUS_PAGE) {
+		if (pageAction === PAGINATION.PREVIOUS_PAGE) {
 			if (page - 1 > -1) {
 				setPage(page - 1);
 			}
-		} else if (pageAction === pagination.NEXT_PAGE) {
+		} else if (pageAction === PAGINATION.NEXT_PAGE) {
 			if (totalPage > (page + 1) * 15 - 30) {
+				setPaginationDisabled({ ...paginationDisabled, NEXT_PAGE: true });
 				setPage(page + 1);
 			}
 		}
@@ -201,28 +233,27 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 							' - ' +
 							(totalPage - (page + 1) * 15 - 15 > -1 ? (page + 1) * 15 : totalPage) +
 							' of ' +
-							totalPage}{' '}
-						page
+							totalPage}
 					</div>
 					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, pagination.FIRST_PAGE)}
-						disabled={false}>
+						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.FIRST_PAGE)}
+						disabled={paginationDisabled.FIRST_PAGE}>
 						<Icon className={styles.paginationIcon} iconName='ChevronLeftEnd6' />
 					</button>
 					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, pagination.PREVIOUS_PAGE)}
-						disabled={false}>
+						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.PREVIOUS_PAGE)}
+						disabled={paginationDisabled.PREVIOUS_PAGE}>
 						<Icon className={styles.paginationIcon} iconName='ChevronLeftSmall' />
 					</button>
 					<div className={page + ' ' + styles.pageNumber}>{page + 1}</div>
 					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, pagination.NEXT_PAGE)}
-						disabled={false}>
+						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.NEXT_PAGE)}
+						disabled={paginationDisabled.NEXT_PAGE}>
 						<Icon className={styles.paginationIcon} iconName='ChevronRightSmall' />
 					</button>
 					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, pagination.LAST_PAGE)}
-						disabled={false}>
+						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.LAST_PAGE)}
+						disabled={paginationDisabled.LAST_PAGE}>
 						<Icon className={styles.paginationIcon} iconName='ChevronRightEnd6' />
 					</button>
 				</div>

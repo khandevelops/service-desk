@@ -6,7 +6,7 @@ export interface IServiceDeskProps {
 }
 
 export interface IRequest extends Partial<IItem> {
-  id?: number;
+  Id?: number;
   Category: string;
   SubCategory: string;
   Description: string;
@@ -18,8 +18,8 @@ export interface IRequest extends Partial<IItem> {
   CompletedTime?: Date;
   Completed: boolean;
   Comment: string;
-  Attachment: boolean;
-  File?: FileList;
+  Attachments: boolean;
+  AttachedFiles?: FileList;
 }
 
 export interface ICurrentUser {

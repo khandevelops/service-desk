@@ -1,4 +1,4 @@
-export const PRIORITY = ['Normal', 'High']
+export const PRIORITY = { NORMAL: 'NORMAL', HIGH: 'HIGH' }
 export const ASSIGN = [
 
     "Accessioning",
@@ -40,7 +40,7 @@ export const CATEGORY = [
     }
 ]
 
-export const pagination = {
+export const PAGINATION = {
     FIRST_PAGE: 'FIRST_PAGE',
     LAST_PAGE: 'LAST_PAGE',
     PREVIOUS_PAGE: 'PREVIOUS_PAGE',

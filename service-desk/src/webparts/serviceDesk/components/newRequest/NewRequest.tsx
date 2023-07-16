@@ -24,15 +24,15 @@ const NewRequest = ({
 		watch,
 		reset,
 		formState: { isValid }
-	} = useForm<IRequest & { File: FileList }>({
+	} = useForm<IRequest>({
 		defaultValues: {
 			Category: null,
 			SubCategory: null,
-			Priority: 'NORMAL',
+			Priority: PRIORITY.NORMAL,
 			AssignedTo: null,
 			Description: null,
 			SubmittedBy: null,
-			File: null
+			AttachedFiles: null
 		}
 	});
 
@@ -42,28 +42,27 @@ const NewRequest = ({
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.add({
-				Priority: addRequestRequest.Priority,
 				Category: addRequestRequest.Category,
 				SubCategory: addRequestRequest.SubCategory,
-				Assign: addRequestRequest.AssignedTo,
+				Priority: addRequestRequest.Priority,
+				AssignedTo: addRequestRequest.AssignedTo,
 				Description: addRequestRequest.Description,
-				SubmittedBy: addRequestRequest.SubmittedBy
+				SubmittedBy: addRequestRequest.SubmittedBy,
+				CreatedTime: new Date()
 			})
 			.then((addRequestResponse: IItemAddResult) => {
-				if (addRequestRequest.File.length > 0) {
-					addRequestRequest.File[0]
+				if (addRequestRequest.AttachedFiles && addRequestRequest.AttachedFiles.length > 0) {
+					addRequestRequest.AttachedFiles[0]
 						.arrayBuffer()
 						.then((buffer) => {
 							sp.web.lists
 								.getByTitle('Requests')
 								.items.getById(addRequestResponse.data.Id)
-								.attachmentFiles.add(addRequestRequest.File[0].name, buffer)
+								.attachmentFiles.add(addRequestRequest.AttachedFiles[0].name, buffer)
 								.then(() => reset())
 								.catch((error: Error) => console.error(error.message));
 						})
 						.catch((error: Error) => console.error(error.message));
-				} else {
-					closeNewRequestDrawer(event);
 				}
 			})
 			.then(() => closeNewRequestDrawer(event))
@@ -128,9 +127,9 @@ const NewRequest = ({
 					<label>Priority</label>
 					<div className={styles.select}>
 						<select {...register('Priority')} name='Priority'>
-							{PRIORITY.map((priority, index) => (
-								<option key={index} value={priority} selected={priority === 'NORMAL'}>
-									{priority}
+							{Object.keys(PRIORITY).map((priorityKey: keyof typeof PRIORITY, index: number) => (
+								<option key={index} value={PRIORITY[priorityKey]}>
+									{PRIORITY[priorityKey]}
 								</option>
 							))}
 						</select>
@@ -138,7 +137,7 @@ const NewRequest = ({
 					</div>
 				</div>
 				<div className={styles.selectContainer}>
-					<label>Assign</label>
+					<label>Assign To</label>
 					<div className={styles.select}>
 						<select {...register('AssignedTo')} name='AssignedTo'>
 							{ASSIGN.map((assignTo: string, index: number) => (
@@ -156,7 +155,7 @@ const NewRequest = ({
 				</div>
 				<div className={styles.fileInput}>
 					<label>Attachment</label>
-					<input type='file' name='file' {...register('File')} />
+					<input type='file' name='file' {...register('AttachedFiles')} />
 				</div>
 				<div className={styles.textArea}>
 					<label>Description</label>
@@ -165,9 +164,10 @@ const NewRequest = ({
 			</div>
 
 			<div className={styles.buttonGroup}>
-				<button type='submit' disabled={isValid}>
+				<button type='submit' disabled={!isValid}>
 					Submit
 				</button>
+				{isValid}
 				<button onClick={(event: MouseEvent<HTMLElement>) => closeNewRequestDrawer(event)}>Cancel</button>
 			</div>
 		</form>
