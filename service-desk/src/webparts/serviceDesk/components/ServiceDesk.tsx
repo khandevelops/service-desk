@@ -19,11 +19,102 @@ import { ISiteUserInfo } from '@pnp/sp/site-users/types';
 import RequestDetail from './requestDetail/RequestDetail';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { SPComponentLoader } from '@microsoft/sp-loader';
-// import { mockTable } from '../mock/mockTable';
+import { mockTable } from '../mock/mockTable';
 import { IRequest } from './IServiceDesk';
 import { PAGINATION } from '../common/constants';
 // import { IItem } from '@pnp/sp/items';
 SPComponentLoader.loadCss('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
+const Pagination = ({
+	Page,
+	TotalRequest,
+	setPage,
+	sp
+}: {
+	Page: number;
+	TotalRequest: number;
+	setPage: (page: number) => void;
+	sp: SPFI;
+}): JSX.Element => {
+	const [numberOfRequests, setTotalRequest] = useState<number>(10);
+	const [pageDetail, setPageDetail] = useState<{
+		FirstCurrentPageRequest: number;
+		LastCurrentPageRequest: number;
+		FirstPage: boolean;
+		LastPage: boolean;
+	}>({
+		FirstCurrentPageRequest: 1,
+		LastCurrentPageRequest: TotalRequest < 16 ? TotalRequest : 15,
+		FirstPage: true,
+		LastPage: TotalRequest < 16 ? true : false
+	});
+	const { FirstCurrentPageRequest, LastCurrentPageRequest, FirstPage, LastPage } = pageDetail;
+
+	const changePage = (event: MouseEvent<HTMLElement>, pageAction: string): void => {
+		event.preventDefault();
+		// if (FirstPage) {
+		// 	setPaginationDisabled({ ...paginationDisabled, FIRST_PAGE: true, LAST_PAGE: true });
+		// }
+		if (pageAction === PAGINATION.PREVIOUS_PAGE) {
+			if (!FirstPage) {
+				setPage(Page - 1);
+				setPageDetail({
+					...pageDetail,
+					FirstCurrentPageRequest: Page - 1 === 1 ? 1 : (Page - 1) * 15 - 14,
+					LastCurrentPageRequest:
+						Page - 1 === Math.ceil(TotalRequest / 15) ? Page * 15 + (TotalRequest % 15) : Page * 15 - 15,
+					FirstPage: Page - 1 === 1,
+					LastPage: Page - 1 === Math.ceil(TotalRequest / 15)
+				});
+			}
+		}
+		if (pageAction === PAGINATION.NEXT_PAGE) {
+			if (!LastPage) {
+				setPage(Page + 1);
+				setPageDetail({
+					...pageDetail,
+					FirstCurrentPageRequest: Page * 15 + 1,
+					LastCurrentPageRequest:
+						Page + 1 === Math.ceil(TotalRequest / 15) ? Page * 15 + (TotalRequest % 15) : Page * 15 + 15,
+					FirstPage: false,
+					LastPage: Page + 1 === Math.ceil(TotalRequest / 15)
+				});
+			}
+		}
+	};
+
+	return (
+		<div className={styles.pagination}>
+			<div>
+				<input
+					type='number'
+					onChange={(event: ChangeEvent<HTMLInputElement>) => setTotalRequest(parseInt(event.target.value))}
+				/>
+				<button
+					onClick={(event: MouseEvent<HTMLElement>) => {
+						event.preventDefault();
+						mockTable(numberOfRequests, sp, 'Requests');
+					}}>
+					Submit
+				</button>
+			</div>
+			<div>{FirstCurrentPageRequest + ' - ' + LastCurrentPageRequest + ' of ' + TotalRequest}</div>
+			<button onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.FIRST_PAGE)}>
+				<Icon className={styles.paginationIcon} iconName='ChevronLeftEnd6' />
+			</button>
+			<button onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.PREVIOUS_PAGE)}>
+				<Icon className={styles.paginationIcon} iconName='ChevronLeftSmall' />
+			</button>
+			<div className={styles.pageNumber}>{Page}</div>
+			<button onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.NEXT_PAGE)}>
+				<Icon className={styles.paginationIcon} iconName='ChevronRightSmall' />
+			</button>
+			<button onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.LAST_PAGE)}>
+				<Icon className={styles.paginationIcon} iconName='ChevronRightEnd6' />
+			</button>
+		</div>
+	);
+};
 
 const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
 	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);
@@ -87,61 +178,42 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 };
 
 const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
-	// const [numberOfRequests, setNumberOfRequests] = useState<number>(200);
-
 	const sp: SPFI = spfi().using(SPFx(context));
 	const [newRequestDrawer, setNewRequestDrawer] = useState<boolean>(false);
-	// const [pagedRequests, setPagedRequests] = useState<IRequest[]>([]);
 	const [requests, setRequests] = useState<IRequest[]>([]);
-	// const [pagedRequests, setPagedRequests] = useState<{ hasNext: boolean; results: IRequest[] }>({
-	// 	hasNext: false,
-	// 	results: []
-	// });
 	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
-	const [totalPage, setTotalPage] = useState<number>(0);
-	const [page, setPage] = useState<number>(0);
-	const [paginationDisabled, setPaginationDisabled] = useState<{
-		FIRST_PAGE: boolean;
-		LAST_PAGE: boolean;
-		PREVIOUS_PAGE: boolean;
-		NEXT_PAGE: boolean;
-	}>({
-		FIRST_PAGE: true,
-		LAST_PAGE: false,
-		PREVIOUS_PAGE: true,
-		NEXT_PAGE: false
-	});
+	const [page, setPage] = useState<number>(1);
+	const [totalRequest, setTotalRequests] = useState<number>(0);
+	// const [paginationDisabled, setPaginationDisabled] = useState<{
+	// 	FIRST_PAGE: boolean;
+	// 	LAST_PAGE: boolean;
+	// 	PREVIOUS_PAGE: boolean;
+	// 	NEXT_PAGE: boolean;
+	// }>({
+	// 	FIRST_PAGE: true,
+	// 	LAST_PAGE: false,
+	// 	PREVIOUS_PAGE: false,
+	// 	NEXT_PAGE: false
+	// });
 
 	useEffect(() => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.top(5000)()
 			.then((response) => {
-				setTotalPage(response.length);
-				setRequests(response.sort((requestA, requestB) => requestA.Id - requestB.Id).splice(page * 15, 15));
+				setRequests(response);
+				setTotalRequests(response.length);
 			})
 			.catch((error: Error) => console.error(error.message));
 
 		sp.web
 			.currentUser()
-			.then((response) => setCurrentUser(response))
-			.then(() => currentUser)
+			.then((response) => {
+				setCurrentUser(response);
+				console.log(currentUser);
+			})
 			.catch((error: Error) => console.error(error.message));
 	}, [page]);
-
-	const changePage = (event: MouseEvent<HTMLElement>, pageAction: string): void => {
-		event.preventDefault();
-		if (pageAction === PAGINATION.PREVIOUS_PAGE) {
-			if (page - 1 > -1) {
-				setPage(page - 1);
-			}
-		} else if (pageAction === PAGINATION.NEXT_PAGE) {
-			if (totalPage > (page + 1) * 15 - 30) {
-				setPaginationDisabled({ ...paginationDisabled, NEXT_PAGE: true });
-				setPage(page + 1);
-			}
-		}
-	};
 
 	const openNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
 		event.preventDefault();
@@ -158,7 +230,6 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.getByTitle('Requests')
 			.items.top(5000)()
 			.then((requests) => {
-				setTotalPage(requests.length);
 				const keyword = event.target.value;
 				const keys = requests[0] && Object.keys(requests[0]);
 				setRequests(
@@ -169,6 +240,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 						)
 					)
 				);
+				setPage(1);
 			})
 			.catch((error: Error) => console.error(error.message));
 	};
@@ -189,74 +261,36 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			<div className={styles.bodyContainer}>
 				<div className={styles.requests}>
 					{requests.length > 0 ? (
-						<table>
-							<tr>
-								<th>Category</th>
-								<th>Sub Category</th>
-								<th>Description</th>
-								<th>Priority</th>
-								<th>Assigned To</th>
-								<th>Submitted By</th>
-								<th>Created Time</th>
-								<th>Completed By</th>
-								<th>Completed Time</th>
-								<th>Attachment</th>
-								<th className={styles.iconHeader}>More</th>
-							</tr>
-							{requests.map((request, index) => (
-								<TableBody key={index} request={request} sp={sp} />
-							))}
-						</table>
+						<div>
+							<table>
+								<tr>
+									<th>Category</th>
+									<th>Sub Category</th>
+									<th>Description</th>
+									<th>Priority</th>
+									<th>Assigned To</th>
+									<th>Submitted By</th>
+									<th>Created Time</th>
+									<th>Completed By</th>
+									<th>Completed Time</th>
+									<th>Attachment</th>
+									<th className={styles.iconHeader}>More</th>
+								</tr>
+								{requests
+									.sort((requestA, requestB) => requestB.Id - requestA.Id)
+									.splice((page - 1) * 15, 15)
+									.map((request, index) => (
+										<TableBody key={index} request={request} sp={sp} />
+									))}
+							</table>
+						</div>
 					) : (
 						<div>There are no request for you</div>
 					)}
 				</div>
-				<div className={styles.pagination}>
-					{/* <div>
-							<input
-								type='number'
-								onChange={(event: ChangeEvent<HTMLInputElement>) =>
-									setNumberOfRequests(parseInt(event.target.value))
-								}
-							/>
-							<button
-								onClick={(event: MouseEvent<HTMLElement>) => {
-									event.preventDefault();
-									mockTable(numberOfRequests, sp, 'Requests');
-								}}>
-								Submit
-							</button>
-						</div> */}
-					<div>
-						{page * 15 +
-							1 +
-							' - ' +
-							(totalPage - (page + 1) * 15 - 15 > -1 ? (page + 1) * 15 : totalPage) +
-							' of ' +
-							totalPage}
-					</div>
-					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.FIRST_PAGE)}
-						disabled={paginationDisabled.FIRST_PAGE}>
-						<Icon className={styles.paginationIcon} iconName='ChevronLeftEnd6' />
-					</button>
-					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.PREVIOUS_PAGE)}
-						disabled={paginationDisabled.PREVIOUS_PAGE}>
-						<Icon className={styles.paginationIcon} iconName='ChevronLeftSmall' />
-					</button>
-					<div className={page + ' ' + styles.pageNumber}>{page + 1}</div>
-					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.NEXT_PAGE)}
-						disabled={paginationDisabled.NEXT_PAGE}>
-						<Icon className={styles.paginationIcon} iconName='ChevronRightSmall' />
-					</button>
-					<button
-						onClick={(event: MouseEvent<HTMLElement>) => changePage(event, PAGINATION.LAST_PAGE)}
-						disabled={paginationDisabled.LAST_PAGE}>
-						<Icon className={styles.paginationIcon} iconName='ChevronRightEnd6' />
-					</button>
-				</div>
+				{requests.length > 0 && (
+					<Pagination Page={page} TotalRequest={totalRequest} setPage={setPage} sp={sp} />
+				)}
 			</div>
 		</div>
 	);

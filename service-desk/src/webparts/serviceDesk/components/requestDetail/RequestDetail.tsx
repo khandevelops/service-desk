@@ -1,9 +1,10 @@
 import { SPFI } from '@pnp/sp';
 import * as React from 'react';
-import { MouseEvent } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IRequest } from '../IServiceDesk';
+import { ISiteUserInfo } from '@pnp/sp/site-users/types';
 
 const RequestDetail = ({
 	sp,
@@ -15,6 +16,15 @@ const RequestDetail = ({
 	closeRequestDetailDrawer: { (event: MouseEvent<HTMLElement>): void };
 }): JSX.Element => {
 	const { register, handleSubmit } = useForm<IRequest>();
+	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
+
+	useEffect(() => {
+		sp.web
+			.currentUser()
+			.then((response) => setCurrentUser(response))
+			.then(() => currentUser)
+			.catch((error: Error) => console.error(error.message));
+	}, []);
 
 	const onSubmit: SubmitHandler<IRequest> = (request: IRequest, event: MouseEvent<HTMLElement>) => {
 		sp.web.lists
@@ -23,6 +33,8 @@ const RequestDetail = ({
 			.update({
 				...request,
 				Comment: request.Comment,
+				CompletedTime: new Date(),
+				CompletedBy: currentUser.Title,
 				Completed: true
 			})
 			.then(() => closeRequestDetailDrawer(event))
