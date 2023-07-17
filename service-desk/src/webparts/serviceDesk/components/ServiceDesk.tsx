@@ -22,7 +22,6 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import { mockTable } from '../mock/mockTable';
 import { IRequest } from './IServiceDesk';
 import { PAGINATION } from '../common/constants';
-// import { IItem } from '@pnp/sp/items';
 SPComponentLoader.loadCss('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
 const Pagination = ({
@@ -155,6 +154,7 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 				<td>{request.AssignedTo}</td>
 				<td>{request.SubmittedBy}</td>
 				<td>{request.CreatedTime}</td>
+				<td>{request.Status}</td>
 				<td>{request.CompletedBy}</td>
 				<td>{request.CompletedTime}</td>
 				<td>
@@ -169,6 +169,7 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 						</a>
 					)}
 				</td>
+				<td>{request.Comment}</td>
 				<td className={styles.more} onClick={openRequestDetailDrawer}>
 					<i className='fa fa-ellipsis-v' aria-hidden='true' />
 				</td>
@@ -184,6 +185,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
 	const [page, setPage] = useState<number>(1);
 	const [totalRequest, setTotalRequests] = useState<number>(0);
+	const [keyword, setKeyword] = useState<string>('');
 	// const [paginationDisabled, setPaginationDisabled] = useState<{
 	// 	FIRST_PAGE: boolean;
 	// 	LAST_PAGE: boolean;
@@ -200,9 +202,21 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.top(5000)()
-			.then((response) => {
+			.then((response: IRequest[]) => {
 				setTotalRequests(response.length);
-				setRequests(response);
+				const keys = response[0] && Object.keys(response[0]);
+				const filteredRequests: IRequest[] = response.filter((response) =>
+					keys.some(
+						(key: keyof IRequest) => String(response[key]).toLowerCase().indexOf(keyword.toLowerCase()) > -1
+					)
+				);
+				if (keyword) {
+					setPage(1);
+					setTotalRequests(filteredRequests.length);
+					setRequests(filteredRequests);
+				} else {
+					setRequests(response);
+				}
 			})
 			.catch((error: Error) => console.error(error.message));
 
@@ -210,10 +224,10 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.currentUser()
 			.then((response) => {
 				setCurrentUser(response);
-				console.log(currentUser);
+				return currentUser;
 			})
 			.catch((error: Error) => console.error(error.message));
-	}, [page, totalRequest]);
+	}, [page, keyword]);
 
 	const openNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
 		event.preventDefault();
@@ -225,26 +239,6 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 		setNewRequestDrawer(false);
 	};
 
-	const searchTable = (event: ChangeEvent<HTMLInputElement>): void => {
-		sp.web.lists
-			.getByTitle('Requests')
-			.items.top(5000)()
-			.then((requests) => {
-				const keyword = event.target.value;
-				const keys = requests[0] && Object.keys(requests[0]);
-				setRequests(
-					requests.filter((request) =>
-						keys.some(
-							(key: keyof IRequest) =>
-								String(request[key]).toLowerCase().indexOf(keyword.toLowerCase()) > -1
-						)
-					)
-				);
-				setPage(1);
-			})
-			.catch((error: Error) => console.error(error.message));
-	};
-
 	return (
 		<div className={styles.container}>
 			<Drawer open={newRequestDrawer} anchor='right'>
@@ -253,9 +247,9 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			<div className={styles.headerContainer}>
 				<div className={styles.search}>
 					<Icon iconName='Search' className={styles.icon} />
-					<input type='search' onChange={searchTable} />
+					<input onChange={(event: ChangeEvent<HTMLInputElement>) => setKeyword(event.target.value)} />
 				</div>
-
+				<div style={{ color: 'red' }}>TESTING IN PROGRESS!!!</div>
 				<button onClick={openNewRequestDrawer}>NEW REQUEST</button>
 			</div>
 			<div className={styles.bodyContainer}>
@@ -271,9 +265,11 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 									<th>Assigned To</th>
 									<th>Submitted By</th>
 									<th>Created Time</th>
+									<th>Status</th>
 									<th>Completed By</th>
 									<th>Completed Time</th>
 									<th>Attachment</th>
+									<th>Comment</th>
 									<th className={styles.iconHeader}>More</th>
 								</tr>
 								{requests
@@ -288,9 +284,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 						<div>There are no request for you</div>
 					)}
 				</div>
-				{requests.length > 0 && (
-					<Pagination Page={page} TotalRequest={totalRequest} setPage={setPage} sp={sp} />
-				)}
+				<Pagination Page={page} TotalRequest={totalRequest} setPage={setPage} sp={sp} />
 			</div>
 		</div>
 	);

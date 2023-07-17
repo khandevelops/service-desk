@@ -18,6 +18,7 @@ export interface IRequest extends Partial<IItem> {
   CompletedTime?: Date;
   Completed: boolean;
   Comment: string;
+  Status: string;
   Attachments: boolean;
   AttachedFiles?: FileList;
 }
