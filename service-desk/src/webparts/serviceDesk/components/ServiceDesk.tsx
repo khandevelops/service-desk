@@ -201,8 +201,8 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			.getByTitle('Requests')
 			.items.top(5000)()
 			.then((response) => {
-				setRequests(response);
 				setTotalRequests(response.length);
+				setRequests(response);
 			})
 			.catch((error: Error) => console.error(error.message));
 
@@ -213,7 +213,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 				console.log(currentUser);
 			})
 			.catch((error: Error) => console.error(error.message));
-	}, [page]);
+	}, [page, totalRequest]);
 
 	const openNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
 		event.preventDefault();
