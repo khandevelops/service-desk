@@ -5,6 +5,7 @@ import styles from './RequestDetail.module.scss';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IRequest } from '../IServiceDesk';
 import { ISiteUserInfo } from '@pnp/sp/site-users/types';
+import { STATUS } from '../../common/constants';
 
 const RequestDetail = ({
 	sp,
@@ -35,7 +36,8 @@ const RequestDetail = ({
 				Comment: request.Comment,
 				CompletedTime: new Date(),
 				CompletedBy: currentUser.Title,
-				Completed: true
+				Completed: true,
+				Status: STATUS.COMPLETE
 			})
 			.then(() => closeRequestDetailDrawer(event))
 			.catch((error: Error) => console.error(error.message));

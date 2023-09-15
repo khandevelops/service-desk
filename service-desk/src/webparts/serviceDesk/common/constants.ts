@@ -1,12 +1,13 @@
 export const PRIORITY = { NORMAL: 'NORMAL', HIGH: 'HIGH' }
+export const STATUS = { PENDING: 'PENDING', COMPLETE: 'COMPLETE' }
 export const ASSIGN = [
-
     "Accessioning",
     "Order entry",
     "Specimen storage",
     "Initial aliquoting",
     "Confirmation aliquoting",
-    "Mass spec"]
+    "Mass spec"
+]
 export const CATEGORY = [
     {
         CATEGORY: 'Batch Corrections', SUBCATEGORY: [

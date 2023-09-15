@@ -3,7 +3,7 @@ import { MouseEvent } from 'react';
 import styles from './NewRequest.module.scss';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ASSIGN, CATEGORY, PRIORITY } from '../../common/constants';
+import { CATEGORY, PRIORITY, STATUS } from '../../common/constants';
 import { IItemAddResult } from '@pnp/sp/items';
 import { SPFI } from '@pnp/sp';
 import { Icon } from 'office-ui-fabric-react';
@@ -17,6 +17,7 @@ const NewRequest = ({
 	closeNewRequestDrawer: (event: MouseEvent<HTMLElement>) => void;
 }): JSX.Element => {
 	const [subCategory, setSubCategory] = useState<string[]>([]);
+	const [departments, setDepartments] = useState<{ Title: string }[]>([]);
 	const {
 		register,
 		handleSubmit,
@@ -42,12 +43,15 @@ const NewRequest = ({
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.add({
+				HBN: addRequestRequest.HBN,
+				HSN: addRequestRequest.HSN,
 				Category: addRequestRequest.Category,
 				SubCategory: addRequestRequest.SubCategory,
 				Priority: addRequestRequest.Priority,
 				AssignedTo: addRequestRequest.AssignedTo,
 				Description: addRequestRequest.Description,
 				SubmittedBy: addRequestRequest.SubmittedBy,
+				Status: STATUS.PENDING,
 				CreatedTime: new Date()
 			})
 			.then((addRequestResponse: IItemAddResult) => {
@@ -70,6 +74,17 @@ const NewRequest = ({
 	};
 
 	useEffect(() => {
+		sp.web.lists
+			.getByTitle('Departments')
+			.items()
+			.then((response) => {
+				setDepartments(
+					response.map((item) => ({
+						Title: item.Title
+					}))
+				);
+			})
+			.catch((error: Error) => console.error(error.message));
 		sp.web
 			.currentUser()
 			.then((currentUser) => setValue('SubmittedBy', currentUser.Title))
@@ -85,12 +100,20 @@ const NewRequest = ({
 	}, [watch]);
 
 	return (
-		<form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
-			<div className={styles.inputContainer}>
+		<form className={styles.formContainer} onSubmit={handleSubmit(onSubmit)}>
+			<div className={styles.formGroup}>
+				<div className={styles.textInput}>
+					<label>HBN</label>
+					<input {...register('HBN', { required: true })} name='HBN' />
+				</div>
+				<div className={styles.textInput}>
+					<label>HBN</label>
+					<input {...register('HSN', { required: true })} name='HSN' />
+				</div>
 				<div className={styles.selectContainer}>
 					<label>Category</label>
 					<div className={styles.select}>
-						<select {...register('Category', { required: true })} name='Category' required>
+						<select {...register('Category', { required: true })} name='Category'>
 							{CATEGORY.map((category: { CATEGORY: string; SUBCATEGORY: string[] }, index: number) => (
 								<option
 									key={index}
@@ -140,15 +163,12 @@ const NewRequest = ({
 					<label>Assign To</label>
 					<div className={styles.select}>
 						<select {...register('AssignedTo')} name='AssignedTo'>
-							{ASSIGN.map((assignTo: string, index: number) => (
-								<option
-									key={index}
-									value={assignTo}
-									hidden={assignTo === 'Assign to'}
-									selected={assignTo === 'Assign to'}>
-									{assignTo}
-								</option>
-							))}
+							{departments.length > 0 &&
+								departments.map((assignTo: { Title: string }, index: number) => (
+									<option key={index} value={assignTo.Title}>
+										{assignTo.Title}
+									</option>
+								))}
 						</select>
 						<Icon iconName='ChevronDownMed' className={styles.icon} />
 					</div>

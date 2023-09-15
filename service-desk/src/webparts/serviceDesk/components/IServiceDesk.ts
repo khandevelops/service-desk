@@ -7,6 +7,8 @@ export interface IServiceDeskProps {
 
 export interface IRequest extends Partial<IItem> {
   Id?: number;
+  HBN: string;
+  HSN: string;
   Category: string;
   SubCategory: string;
   Description: string;

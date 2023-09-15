@@ -14,7 +14,18 @@ import '@pnp/sp/attachments';
 import '@pnp/sp/search';
 import '@pnp/sp/items/get-all';
 import { IAttachmentInfo } from '@pnp/sp/attachments';
-import { Drawer } from '@mui/material';
+import {
+	Drawer,
+	Table,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	TableBody,
+	Paper,
+	styled,
+	tableCellClasses
+} from '@mui/material';
 import { ISiteUserInfo } from '@pnp/sp/site-users/types';
 import RequestDetail from './requestDetail/RequestDetail';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
@@ -22,6 +33,7 @@ import { SPComponentLoader } from '@microsoft/sp-loader';
 import { mockTable } from '../mock/mockTable';
 import { IRequest } from './IServiceDesk';
 import { PAGINATION } from '../common/constants';
+import { inRange } from 'lodash';
 SPComponentLoader.loadCss('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
 
 const Pagination = ({
@@ -42,11 +54,21 @@ const Pagination = ({
 		FirstPage: boolean;
 		LastPage: boolean;
 	}>({
-		FirstCurrentPageRequest: 1,
-		LastCurrentPageRequest: TotalRequest < 16 ? TotalRequest : 15,
+		FirstCurrentPageRequest: 0,
+		LastCurrentPageRequest: 0,
 		FirstPage: true,
-		LastPage: TotalRequest < 16 ? true : false
+		LastPage: true
 	});
+
+	useEffect(() => {
+		setPageDetail({
+			FirstCurrentPageRequest: 1,
+			LastCurrentPageRequest: TotalRequest < 16 ? TotalRequest : 15,
+			FirstPage: true,
+			LastPage: TotalRequest < 16 ? true : false
+		});
+	}, [TotalRequest]);
+
 	const { FirstCurrentPageRequest, LastCurrentPageRequest, FirstPage, LastPage } = pageDetail;
 
 	const changePage = (event: MouseEvent<HTMLElement>, pageAction: string): void => {
@@ -84,6 +106,7 @@ const Pagination = ({
 
 	return (
 		<div className={styles.pagination}>
+			<div>{TotalRequest}</div>
 			<div>
 				<input
 					type='number'
@@ -115,7 +138,21 @@ const Pagination = ({
 	);
 };
 
-const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+	[`&.${tableCellClasses.head}`]: {
+		backgroundColor: '#ffd740',
+		fontFamily: 'Montserrat, "Montserrat", sans-serif',
+		fontSize: 14,
+		fontWeight: 700,
+		color: theme.palette.common.black
+	},
+	[`&.${tableCellClasses.body}`]: {
+		fontFamily: 'Montserrat, "Montserrat", sans-serif',
+		fontSize: 13
+	}
+}));
+
+const RequestTableRow = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Element => {
 	const [requestDetailDrawer, setRequestDetailDrawer] = useState<boolean>(false);
 	const [attachedFiles, setAttachedFiles] = useState<IAttachmentInfo[]>([]);
 
@@ -146,18 +183,44 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 			<Drawer open={requestDetailDrawer} anchor='right'>
 				<RequestDetail sp={sp} request={request} closeRequestDetailDrawer={closeRequestDetailDrawer} />
 			</Drawer>
-			<tr>
-				<td>{request.Category}</td>
-				<td>{request.SubCategory}</td>
-				<td>{request.Description}</td>
-				<td>{request.Priority}</td>
-				<td>{request.AssignedTo}</td>
-				<td>{request.SubmittedBy}</td>
-				<td>{request.CreatedTime}</td>
-				<td>{request.Status}</td>
-				<td>{request.CompletedBy}</td>
-				<td>{request.CompletedTime}</td>
-				<td>
+			<TableRow>
+				<StyledTableCell align='right' width={200}>
+					{request.HBN}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={200}>
+					{request.HSN}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={200}>
+					{request.Category}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={240}>
+					{request.SubCategory}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={400}>
+					{request.Description}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={80}>
+					{request.Priority}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={120}>
+					{request.AssignedTo}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={120}>
+					{request.SubmittedBy}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={160}>
+					{request.CreatedTime}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={120}>
+					{request.Status}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={100}>
+					{request.CompletedBy}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={160}>
+					{request.CompletedTime}
+				</StyledTableCell>
+				<StyledTableCell align='right' width={240}>
 					{request.Attachments && attachedFiles.length > 0 && (
 						<a
 							href={`https://usdtl.sharepoint.com/${attachedFiles[0].ServerRelativeUrl}`}
@@ -168,12 +231,18 @@ const TableBody = ({ request, sp }: { request: IRequest; sp: SPFI }): JSX.Elemen
 								: attachedFiles[0].FileName}
 						</a>
 					)}
-				</td>
-				<td>{request.Comment}</td>
-				<td className={styles.more} onClick={openRequestDetailDrawer}>
-					<i className='fa fa-ellipsis-v' aria-hidden='true' />
-				</td>
-			</tr>
+				</StyledTableCell>
+				<StyledTableCell align='right'>{request.Comment}</StyledTableCell>
+				<StyledTableCell
+					align='center'
+					width={50}
+					sx={{ textAlign: 'center', cursor: 'pointer' }}
+					onClick={openRequestDetailDrawer}>
+					<div>
+						<i className='fa fa-ellipsis-v' aria-hidden='true' />
+					</div>
+				</StyledTableCell>
+			</TableRow>
 		</Fragment>
 	);
 };
@@ -183,40 +252,17 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 	const [newRequestDrawer, setNewRequestDrawer] = useState<boolean>(false);
 	const [requests, setRequests] = useState<IRequest[]>([]);
 	const [currentUser, setCurrentUser] = useState<ISiteUserInfo | null>(null);
-	const [page, setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(0);
 	const [totalRequest, setTotalRequests] = useState<number>(0);
-	const [keyword, setKeyword] = useState<string>('');
-	// const [paginationDisabled, setPaginationDisabled] = useState<{
-	// 	FIRST_PAGE: boolean;
-	// 	LAST_PAGE: boolean;
-	// 	PREVIOUS_PAGE: boolean;
-	// 	NEXT_PAGE: boolean;
-	// }>({
-	// 	FIRST_PAGE: true,
-	// 	LAST_PAGE: false,
-	// 	PREVIOUS_PAGE: false,
-	// 	NEXT_PAGE: false
-	// });
 
 	useEffect(() => {
 		sp.web.lists
 			.getByTitle('Requests')
 			.items.top(5000)()
 			.then((response: IRequest[]) => {
+				setPage(1);
 				setTotalRequests(response.length);
-				const keys = response[0] && Object.keys(response[0]);
-				const filteredRequests: IRequest[] = response.filter((response) =>
-					keys.some(
-						(key: keyof IRequest) => String(response[key]).toLowerCase().indexOf(keyword.toLowerCase()) > -1
-					)
-				);
-				if (keyword) {
-					setPage(1);
-					setTotalRequests(filteredRequests.length);
-					setRequests(filteredRequests);
-				} else {
-					setRequests(response);
-				}
+				setRequests(response);
 			})
 			.catch((error: Error) => console.error(error.message));
 
@@ -227,7 +273,7 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 				return currentUser;
 			})
 			.catch((error: Error) => console.error(error.message));
-	}, [page, keyword]);
+	}, []);
 
 	const openNewRequestDrawer = (event: MouseEvent<HTMLElement>): void => {
 		event.preventDefault();
@@ -239,6 +285,25 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 		setNewRequestDrawer(false);
 	};
 
+	const searchRequests = (event: ChangeEvent<HTMLInputElement>): void => {
+		sp.web.lists
+			.getByTitle('Requests')
+			.items.top(5000)()
+			.then((response: IRequest[]) => {
+				const keyword = event.target.value;
+				const keys = response[0] && Object.keys(response[0]);
+				const filteredRequests: IRequest[] = response.filter((request) =>
+					keys.some(
+						(key: keyof IRequest) => String(request[key]).toLowerCase().indexOf(keyword.toLowerCase()) > -1
+					)
+				);
+				setPage(1);
+				setTotalRequests(filteredRequests.length);
+				setRequests(filteredRequests);
+			})
+			.catch((error: Error) => console.error(error.message));
+	};
+
 	return (
 		<div className={styles.container}>
 			<Drawer open={newRequestDrawer} anchor='right'>
@@ -247,44 +312,54 @@ const ServiceDesk = ({ context }: { context: WebPartContext }): JSX.Element => {
 			<div className={styles.headerContainer}>
 				<div className={styles.search}>
 					<Icon iconName='Search' className={styles.icon} />
-					<input onChange={(event: ChangeEvent<HTMLInputElement>) => setKeyword(event.target.value)} />
+					<input onChange={searchRequests} />
 				</div>
 				<div style={{ color: 'red' }}>TESTING IN PROGRESS!!!</div>
-				<button onClick={openNewRequestDrawer}>NEW REQUEST</button>
+				<button type='button' onClick={openNewRequestDrawer}>
+					NEW REQUEST
+				</button>
 			</div>
 			<div className={styles.bodyContainer}>
 				<div className={styles.requests}>
 					{requests.length > 0 ? (
-						<div>
-							<table>
-								<tr>
-									<th>Category</th>
-									<th>Sub Category</th>
-									<th>Description</th>
-									<th>Priority</th>
-									<th>Assigned To</th>
-									<th>Submitted By</th>
-									<th>Created Time</th>
-									<th>Status</th>
-									<th>Completed By</th>
-									<th>Completed Time</th>
-									<th>Attachment</th>
-									<th>Comment</th>
-									<th className={styles.iconHeader}>More</th>
-								</tr>
-								{requests
-									.sort((requestA, requestB) => requestB.Id - requestA.Id)
-									.splice((page - 1) * 15, 15)
-									.map((request, index) => (
-										<TableBody key={index} request={request} sp={sp} />
-									))}
-							</table>
-						</div>
+						<TableContainer component={Paper}>
+							<Table stickyHeader size='small'>
+								<TableHead>
+									<TableRow sx={{ height: 45 }}>
+										<StyledTableCell align='right'>HBN</StyledTableCell>
+										<StyledTableCell align='right'>HSN</StyledTableCell>
+										<StyledTableCell align='right'>Category</StyledTableCell>
+										<StyledTableCell align='right'>Sub Category</StyledTableCell>
+										<StyledTableCell align='right'>Description</StyledTableCell>
+										<StyledTableCell align='right'>Priority</StyledTableCell>
+										<StyledTableCell align='right'>Assigned To</StyledTableCell>
+										<StyledTableCell align='right'>Submitted By</StyledTableCell>
+										<StyledTableCell align='right'>Created Time</StyledTableCell>
+										<StyledTableCell align='right'>Status</StyledTableCell>
+										<StyledTableCell align='right'>Completed By</StyledTableCell>
+										<StyledTableCell align='right'>Completed Time</StyledTableCell>
+										<StyledTableCell align='right'>Attachment</StyledTableCell>
+										<StyledTableCell align='right'>Comment</StyledTableCell>
+										<StyledTableCell align='center'>More</StyledTableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{requests
+										.sort((requestA, requestB) => requestB.Id - requestA.Id)
+										.filter((request, index) => inRange(index, page - 1, page - 1 + 15))
+										.map((request, index) => (
+											<RequestTableRow key={index} request={request} sp={sp} />
+										))}
+								</TableBody>
+							</Table>
+						</TableContainer>
 					) : (
 						<div>There are no request for you</div>
 					)}
 				</div>
-				<Pagination Page={page} TotalRequest={totalRequest} setPage={setPage} sp={sp} />
+				{requests.length > 0 && (
+					<Pagination Page={page} TotalRequest={totalRequest} setPage={setPage} sp={sp} />
+				)}
 			</div>
 		</div>
 	);

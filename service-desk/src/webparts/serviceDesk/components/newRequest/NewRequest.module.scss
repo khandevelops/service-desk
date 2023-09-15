@@ -1,6 +1,6 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
-.container {
+.formContainer {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -8,65 +8,109 @@
 	height: 100%;
 	width: 40rem;
 	margin: 3rem 5rem;
-	.inputContainer {
+	.formGroup {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.75rem;
-	}
-	label {
-		margin-bottom: 0.25rem;
-		font-size: 1em;
-	}
-	.selectIcon {
-		display: flex;
-		flex-direction: row;
-	}
-	.selectContainer {
-		.select {
-			display: flex;
-			align-items: center;
-			height: 3rem;
-			border-radius: 4px;
-			border: 1px solid rgb(225, 225, 225);
-			height: 3rem;
-			padding-left: 0.5rem;
-			padding-right: 0.5rem;
-			margin-right: 0.4rem;
-			.icon {
-				margin-top: 0.2rem;
+		label {
+			margin-bottom: 0.25rem;
+			font-size: 1em;
+		}
+		.selectContainer {
+			.select {
+				display: flex;
+				align-items: center;
+				height: 3rem;
+				border-radius: 4px;
+				border: 1px solid rgb(225, 225, 225);
+				height: 3rem;
+				padding-left: 0.5rem;
+				padding-right: 0.5rem;
 				margin-right: 0.4rem;
-				margin-left: 0.3rem;
+				.icon {
+					margin-top: 0.2rem;
+					margin-right: 0.4rem;
+					margin-left: 0.3rem;
+				}
+				select {
+					width: 100%;
+					all: unset;
+				}
 			}
-			select {
+		}
+		.textInput {
+			input {
+				height: 3rem;
+				border-radius: 4px;
+				border: 1px solid rgb(225, 225, 225);
+				height: 3rem;
+				padding-left: 0.5rem;
+				padding-right: 0.5rem;
+				margin-right: 0.4rem;
 				width: 100%;
-				all: unset;
+			}
+		}
+		.textInput,
+		.selectContainer,
+		.textArea {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+		}
+		.errorMessage {
+			color: red;
+			font-size: small;
+			padding-left: 0.25rem;
+		}
+		.fileInput {
+			display: flex;
+			flex-direction: column;
+			input[type='file'] {
+				border: 1px solid rgb(225, 225, 225);
+				border-radius: 4px;
+				padding: 0;
+				height: 3rem;
+				font-size: 12pt;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+			input[type='file']::file-selector-button {
+				background-color: #1347a4;
+				margin-right: 1rem;
+				color: white;
+				height: 3rem;
+				width: 40%;
+				border-top-left-radius: 4px;
+				border-bottom-left-radius: 4px;
+				border: none;
+				text-decoration: none;
+				transition-duration: 0.4s;
+				overflow: hidden;
+				cursor: pointer;
+			}
+			input[type='file']::file-selector-button:after {
+				content: '';
+				background: #1347a4;
+				display: block;
+				position: absolute;
+				padding-top: 300%;
+				padding-left: 350%;
+				margin-left: -20px !important;
+				margin-top: -120%;
+				opacity: 0;
+				transition: all 0.8s;
+			}
+			input[type='file']::file-selector-button:active:after {
+				padding: 0;
+				margin: 0;
+				opacity: 1;
+				transition: 0s;
 			}
 		}
 	}
-	.input,
-	.selectContainer,
-	.textArea {
-		display: flex;
-		flex-direction: column;
-		input {
-			padding: 0 0 0 1rem;
-			height: 3rem;
-			border-radius: 4px;
-			border: 1px solid rgb(225, 225, 225);
-			font-size: 12pt;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-			-webkit-appearance: none;
-			appearance: none;
-		}
-	}
-	.errorMessage {
-		color: red;
-		font-size: small;
-		padding-left: 0.25rem;
-	}
+
 	.buttonGroup {
 		display: flex;
 		justify-content: stretch;
@@ -87,53 +131,6 @@
 			background-color: #cccccc;
 			color: #666666;
 			cursor: not-allowed;
-		}
-	}
-
-	.fileInput {
-		display: flex;
-		flex-direction: column;
-		input[type='file'] {
-			border: 1px solid rgb(225, 225, 225);
-			border-radius: 4px;
-			padding: 0;
-			height: 3rem;
-			font-size: 12pt;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-		}
-		input[type='file']::file-selector-button {
-			background-color: #1347a4;
-			margin-right: 1rem;
-			color: white;
-			height: 3rem;
-			width: 40%;
-			border-top-left-radius: 4px;
-			border-bottom-left-radius: 4px;
-			border: none;
-			text-decoration: none;
-			transition-duration: 0.4s;
-			overflow: hidden;
-			cursor: pointer;
-		}
-		input[type='file']::file-selector-button:after {
-			content: '';
-			background: #1347a4;
-			display: block;
-			position: absolute;
-			padding-top: 300%;
-			padding-left: 350%;
-			margin-left: -20px !important;
-			margin-top: -120%;
-			opacity: 0;
-			transition: all 0.8s;
-		}
-		input[type='file']::file-selector-button:active:after {
-			padding: 0;
-			margin: 0;
-			opacity: 1;
-			transition: 0s;
 		}
 	}
 }
