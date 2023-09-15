@@ -107,7 +107,7 @@ const NewRequest = ({
 					<input {...register('HBN', { required: true })} name='HBN' />
 				</div>
 				<div className={styles.textInput}>
-					<label>HBN</label>
+					<label>HSN</label>
 					<input {...register('HSN', { required: true })} name='HSN' />
 				</div>
 				<div className={styles.selectContainer}>
